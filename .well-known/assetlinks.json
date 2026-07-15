@@ -1,10 +1,11 @@
 [{
-     "relation": ["delegate_permission/common.handle_all_urls"],
-     "target": {
-       "namespace": "android_app",
-       "package_name": "io.github.branclev.twa",
-       "sha256_cert_fingerprints": [
-         "D0:D5:81:B6:E8:9C:5B:52:06:B2:4E:FE:59:EA:85:22:D9:29:37:D1:39:80:80:F1:34:6B:42:77:E3:89:6A:EB"
-       ]
-     }
-   }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.branclev.twa",
+    "sha256_cert_fingerprints": [
+      "DB:93:E4:BA:24:DD:67:F8:57:DF:2E:EC:1E:4A:D6:FF:72:B5:DD:B0:43:01:29:CB:B6:F0:15:1F:09:1D:8F:8B",
+      "D0:D5:81:B6:E8:9C:5B:52:06:B2:4E:FE:59:EA:85:22:D9:29:37:D1:39:80:80:F1:34:6B:42:77:E3:89:6A:EB"
+    ]
+  }
+}]
