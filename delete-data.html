@@ -22,50 +22,60 @@
   h2 {
     color: #00f5ff;
     font-size: 19px;
-    margin-top: 32px;
+    margin-top: 36px;
   }
   a { color: #00f5ff; }
   .updated { color: #ffffff88; font-size: 14px; margin-bottom: 32px; }
-  ol, ul { padding-left: 22px; }
+  ul, ol { padding-left: 22px; }
   li { margin-bottom: 8px; }
-  .box {
-    background: #ffffff0a;
-    border: 1px solid #ff2d7844;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 20px 0;
-  }
 </style>
 </head>
 <body>
 
 <h1>Neon Drift — Delete Your Data</h1>
-<p class="updated">Last updated: July 14, 2026</p>
+<p class="updated">Last updated: July 22, 2026</p>
 
-<p>Neon Drift (developed by branclev) doesn't use traditional accounts — there's no email, password, or login. Instead, each player has a self-chosen <strong>callsign</strong> that identifies their entries on the leaderboards. This page explains how to have that data deleted.</p>
+<p>Neon Drift (developed by branclev) identifies players by a self-chosen <strong>callsign</strong>, which can optionally be linked to a Google account for cross-device restore, social features, and purchases. This page explains how to have your data deleted.</p>
 
-<h2>How to request deletion</h2>
-<div class="box">
-  <ol>
-    <li>Send an email to <a href="mailto:Branclevy@gmail.com">Branclevy@gmail.com</a> with the subject line <strong>"Delete my data"</strong>.</li>
-    <li>Include the exact <strong>callsign</strong> you used in the game.</li>
-    <li>We'll remove your leaderboard entries (All-Time, Daily, and Storm) associated with that callsign, typically within 7 days.</li>
-  </ol>
-</div>
+<h2>Option 1: Delete in-game (instant, recommended)</h2>
+<p>If your callsign is linked to a Google account, you can delete all your data directly in the game:</p>
+<ol>
+  <li>Open <strong>Settings</strong> from the main menu (Profile tab).</li>
+  <li>Make sure you're signed in with your linked Google account (the game may prompt you to sign in — this is how we verify the data is yours).</li>
+  <li>Scroll to the <strong>Danger Zone</strong> at the bottom and tap <strong>DELETE MY DATA</strong>.</li>
+  <li>You'll be asked to confirm, and asked separately whether to also delete your purchase records (see the note below). Deletion is immediate.</li>
+</ol>
+
+<h2>Option 2: Request by email</h2>
+<p>If you never linked a Google account, or no longer have access to the game:</p>
+<ol>
+  <li>Send an email to <a href="mailto:Branclevy@gmail.com">Branclevy@gmail.com</a> with the subject line <strong>"Delete my data"</strong>.</li>
+  <li>Include the exact <strong>callsign</strong> you used in the game. If your callsign is linked to a Google account, please send the request from the Gmail address of that Google account so we can verify ownership.</li>
+  <li>We'll delete the data described below, typically within 7 days.</li>
+</ol>
 
 <h2>What gets deleted</h2>
 <ul>
-  <li>Your callsign and all associated leaderboard scores (All-Time, Daily, and Storm)</li>
-  <li>Your recorded level and equipped skin shown alongside those scores</li>
+  <li>Your callsign and all associated leaderboard scores (All-Time, Daily, and Storm), including your recorded level and equipped skin</li>
+  <li>Your Google account link (the Google-issued identifier associating your account with your callsign)</li>
+  <li>Your server-side progress backup (experience points)</li>
+  <li>Your friend relationships, and pending friend requests sent or received</li>
+  <li>Your Versus match history and Last Pilot Standing participation records</li>
+  <li>Any push notification device tokens registered to your account</li>
+  <li>Our records of your purchases (see the important note below)</li>
 </ul>
+
+<h2>Important note about purchases</h2>
+<p>Deleting your data includes deleting our record of your in-game purchases, which means <strong>purchased content (skins, Supporter Pack) will no longer be restorable in the game afterward</strong>. Your Google Play order history remains with Google — we can't delete that, and refunds remain subject to Google Play's own refund policies. If you may want your purchases back later, consider requesting deletion of everything except purchase records — just say so in your email.</p>
 
 <h2>What isn't affected</h2>
 <ul>
   <li><strong>Local device data</strong> — your in-game progress, unlocked cosmetics, and settings are stored only on your own device and are not something we can remotely delete. You can clear this yourself at any time by clearing the app's storage/data through your device settings, or by uninstalling the app.</li>
-  <li><strong>Backups</strong> — data may briefly persist in routine database backups after a deletion request, until those backups naturally cycle out. It is removed from all active systems immediately upon request.</li>
+  <li><strong>Google Play records</strong> — your purchase/order history with Google Play belongs to Google and is governed by <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</li>
+  <li><strong>Backups</strong> — data may briefly persist in routine database backups after a deletion request, until those backups naturally cycle out. It is removed from all active systems upon request.</li>
 </ul>
 
-<p>For more detail on what we collect and why, see our <a href="/privacy-policy.html">Privacy Policy</a>.</p>
+<p>For more detail on what we collect and why, see our <a href="https://branclev.github.io/privacy-policy.html">Privacy Policy</a>.</p>
 
 </body>
 </html>
