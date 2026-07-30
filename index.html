@@ -3,32 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Drift — a neon arcade flyer</title>
-<meta name="description" content="Neon Drift is a fast, reflex-driven neon arcade flyer with daily challenges, global leaderboards, and unlockable skins. Play free in your browser.">
+<title>Neon Drift — a free neon arcade flyer with daily challenges &amp; multiplayer</title>
+<meta name="description" content="Neon Drift is a fast, reflex-driven neon arcade flyer. Play free in your browser: endless Classic, a daily challenge, Projectile Storm, head-to-head Versus, and a live Last Pilot Standing battle royale, with dozens of unlockable skins.">
 <style>
   :root { --pink:#ff2d78; --cyan:#00f5ff; }
   * { box-sizing:border-box; }
   body { background:#0a0014; color:#e8e8ff; margin:0;
-         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; line-height:1.6;
+         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; line-height:1.65;
          background-image:radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,45,120,0.18), transparent 70%),
                           radial-gradient(ellipse 50% 40% at 10% 60%, rgba(0,245,255,0.10), transparent 70%),
                           radial-gradient(ellipse 50% 40% at 90% 70%, rgba(0,245,255,0.10), transparent 70%); }
-  .wrap { max-width:760px; margin:0 auto; padding:56px 24px 72px; text-align:center; }
-  h1 { font-size:clamp(44px,12vw,84px); font-weight:800; letter-spacing:4px; margin:8px 0 6px;
+  .wrap { max-width:760px; margin:0 auto; padding:56px 24px 72px; }
+  .center { text-align:center; }
+  h1 { font-size:clamp(44px,12vw,84px); font-weight:800; letter-spacing:4px; margin:8px 0 6px; text-align:center;
        color:var(--pink); text-shadow:0 0 18px var(--pink),0 0 44px rgba(255,45,120,0.6); }
-  .tag { color:var(--cyan); text-shadow:0 0 10px var(--cyan); letter-spacing:2px; font-size:clamp(14px,3.6vw,18px); margin-bottom:34px; }
-  .play { display:inline-block; margin:8px 0 40px; padding:16px 40px; border-radius:10px;
+  .tag { color:var(--cyan); text-shadow:0 0 10px var(--cyan); letter-spacing:2px; font-size:clamp(14px,3.6vw,18px); margin-bottom:28px; text-align:center; }
+  .hero { display:block; width:100%; max-width:620px; margin:0 auto 30px; border-radius:12px; border:1px solid rgba(0,245,255,0.2); box-shadow:0 0 30px rgba(255,45,120,0.25); }
+  .play { display:inline-block; margin:6px 0 40px; padding:16px 40px; border-radius:10px;
           background:linear-gradient(135deg,var(--pink),#ff6ec7); color:#0a0014; font-weight:800; font-size:18px;
           letter-spacing:2px; text-decoration:none; box-shadow:0 0 24px rgba(255,45,120,0.6); }
   .play:active { transform:translateY(1px); }
-  .blurb { max-width:600px; margin:0 auto 30px; color:#d8d4ee; text-align:left; }
-  .blurb h2 { color:var(--cyan); font-size:18px; text-align:center; margin-top:34px; }
-  .modes { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:20px 0 8px; padding:0; list-style:none; }
+  h2 { color:var(--cyan); font-size:20px; margin-top:38px; }
+  p { color:#d8d4ee; }
+  a.inline { color:var(--cyan); text-decoration:none; } a.inline:hover { text-decoration:underline; }
+  .modes { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:18px 0 8px; padding:0; list-style:none; }
   .modes li { border:1px solid rgba(255,45,120,0.35); border-radius:20px; padding:6px 14px; font-size:13px; color:#ffb3d0; }
-  footer { margin-top:48px; padding-top:26px; border-top:1px solid rgba(0,245,255,0.15); font-size:14px; }
-  footer a { color:var(--cyan); text-decoration:none; margin:0 10px; white-space:nowrap; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+  .card { display:block; border:1px solid rgba(0,245,255,0.18); border-radius:10px; padding:14px 16px; text-decoration:none; background:rgba(20,10,35,0.4); }
+  .card b { color:var(--pink); display:block; font-size:15px; margin-bottom:2px; }
+  .card span { color:#cfc9e8; font-size:13px; }
+  footer { margin-top:50px; padding-top:26px; border-top:1px solid rgba(0,245,255,0.15); font-size:14px; text-align:center; }
+  footer a { color:var(--cyan); text-decoration:none; margin:0 9px; white-space:nowrap; line-height:2.2; }
   footer a:hover { text-decoration:underline; }
   .copy { color:#ffffff55; font-size:12px; margin-top:18px; }
+  @media (max-width:520px){ .cards { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -36,18 +44,44 @@
   <h1>NEON DRIFT</h1>
   <div class="tag">FLY THROUGH THE NEON GAUNTLET</div>
 
-  <a class="play" href="https://branclev.github.io/NeonDrift/">▶ PLAY IN YOUR BROWSER</a>
+  <img class="hero" src="https://branclev.github.io/NeonDrift/assets/feature-graphic.png"
+       alt="Neon Drift gameplay: a glowing pink neon bird flying between cyan and gold neon pipes on a dark purple background">
 
-  <div class="blurb">
-    <p>Neon Drift is a fast, reflex-driven arcade flyer soaked in Miami-neon glow. Guide your pilot through an endless gauntlet of pulsing gates — easy to learn, brutal to master. Every run gets faster, with new hazards and difficulty that never lets you settle.</p>
-    <h2>Modes</h2>
-    <ul class="modes">
-      <li>Classic</li><li>Daily Challenge</li><li>Projectile Storm</li><li>Versus</li><li>Last Pilot Standing</li>
-    </ul>
-    <p style="text-align:center;margin-top:18px;">Unlock dozens of glowing skins and pipe designs, climb the global leaderboards, and challenge your friends. Free to play in your browser, with mobile versions on the way.</p>
+  <div class="center">
+    <a class="play" href="https://branclev.github.io/NeonDrift/">▶ PLAY FREE IN YOUR BROWSER</a>
   </div>
 
+  <p>Neon Drift is a fast, reflex-driven arcade flyer soaked in a Miami-neon glow. You guide a glowing pilot through an endless gauntlet of pulsing gates — it's easy to pick up, but every run gets faster, with tighter gaps, streaking projectiles, and tunnel corridors that never let you settle. It's the kind of game you drop into for one quick run and look up an hour later.</p>
+
+  <p>Unlike a one-button flyer, Neon Drift uses a <strong>dual-zone tap</strong>: tap the top of the screen to flap down, the bottom to flap up. That direct up-and-down control is what gives the game its skill ceiling — you can hover, feint, and thread gaps a single-button game never could. The full breakdown is on the <a class="inline" href="https://branclev.github.io/how-to-play.html">How to Play</a> page.</p>
+
+  <h2>Five ways to fly</h2>
+  <ul class="modes">
+    <li>Classic</li><li>Daily Challenge</li><li>Projectile Storm</li><li>Versus</li><li>Last Pilot Standing</li>
+  </ul>
+  <p>Chase your best in endless <strong>Classic</strong>, take the seeded <strong>Daily Challenge</strong> that everyone plays the same way, dodge a barrage in <strong>Projectile Storm</strong>, duel a friend in <strong>Versus</strong>, or drop into a live <strong>Last Pilot Standing</strong> battle royale where the last flyer wins. Each mode has its own leaderboard and its own kind of pressure — see them all on the <a class="inline" href="https://branclev.github.io/game-modes.html">Game Modes</a> page.</p>
+
+  <h2>Earn as you fly</h2>
+  <p>Almost everything feeds progression. Runs earn XP that levels you up, high scores unlock a ladder of achievement bird skins, and there are elaborate animated premium skins, hidden mystery-trail effects, customizable pipe colors and animated designs, and unlockable backgrounds. Two rotating <strong>daily missions</strong> hand out bonus XP every day. The full list lives on the <a class="inline" href="https://branclev.github.io/unlocks-and-skins.html">Unlocks &amp; Skins</a> page.</p>
+
+  <h2>Explore</h2>
+  <div class="cards">
+    <a class="card" href="https://branclev.github.io/how-to-play.html"><b>How to Play</b><span>Controls, scoring, waves &amp; hazards.</span></a>
+    <a class="card" href="https://branclev.github.io/game-modes.html"><b>Game Modes</b><span>All five modes explained.</span></a>
+    <a class="card" href="https://branclev.github.io/unlocks-and-skins.html"><b>Unlocks &amp; Skins</b><span>XP, skins, trails, pipes.</span></a>
+    <a class="card" href="https://branclev.github.io/devlog.html"><b>Devlog</b><span>Latest updates &amp; patch notes.</span></a>
+  </div>
+
+  <h2>Free, and built to keep you coming back</h2>
+  <p>Neon Drift is completely free to play, right in the browser — no download and no account needed to jump in. Link an account and you can back up your XP and skins, add friends by callsign, and carry your progress across devices, but that's entirely optional. With a fresh Daily Challenge, two new daily missions, and a live battle royale available every day, there's always a reason to fly one more run.</p>
+
+  <p style="margin-top:26px;">Neon Drift is free to play in any modern browser, with mobile versions on the way. No install and no sign-up required — just tap and fly.</p>
+
   <footer>
+    <a href="https://branclev.github.io/how-to-play.html">How to Play</a>
+    <a href="https://branclev.github.io/game-modes.html">Game Modes</a>
+    <a href="https://branclev.github.io/unlocks-and-skins.html">Unlocks &amp; Skins</a>
+    <a href="https://branclev.github.io/devlog.html">Devlog</a>
     <a href="https://branclev.github.io/about.html">About</a>
     <a href="https://branclev.github.io/contact.html">Contact</a>
     <a href="https://branclev.github.io/support.html">Support</a>
