@@ -55,6 +55,37 @@
     <a class="play" href="/NeonDrift/">▶ PLAY FREE IN YOUR BROWSER</a>
   </div>
 
+  <!-- ── TRAILER ──────────────────────────────────────────────────────────
+       TO ENABLE: replace YOUTUBE_ID_HERE below with the video id (the part
+       after v= in the YouTube URL) and delete the style="display:none" on the
+       <section>. Nothing else needs changing.
+
+       Deliberately a YOUTUBE EMBED, not a self-hosted file:
+         - GitHub Pages has a soft bandwidth limit and is not a video host; a
+           popular trailer served from here would be throttled or flagged.
+         - The Google Play listing requires a YouTube URL anyway — it will not
+           accept an upload — so the video has to live there regardless.
+         - A YouTube video linking back here is a real inbound link from a
+           domain Google crawls constantly, which is exactly what this site is
+           short of (see the indexing notes in Handoff.md).
+
+       Uses youtube-nocookie.com and loading="lazy": no cookie is set until the
+       viewer actually presses play, which keeps the privacy policy accurate.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <section id="trailer" style="display:none;">
+    <h2>Watch it in motion</h2>
+    <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border:1px solid #00f5ff22;background:#05000c;">
+      <iframe
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+        src="https://www.youtube-nocookie.com/embed/YOUTUBE_ID_HERE"
+        title="Neon Drift — gameplay trailer"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+  </section>
+
   <p>Neon Drift is a fast, reflex-driven arcade flyer soaked in a Miami-neon glow. You guide a glowing pilot through an endless gauntlet of pulsing gates — it's easy to pick up, but every run gets faster, with tighter gaps, streaking projectiles, and tunnel corridors that never let you settle. It's the kind of game you drop into for one quick run and look up an hour later.</p>
 
   <p>Unlike a one-button flyer, Neon Drift uses a <strong>dual-zone tap</strong>: tap the top of the screen to flap down, the bottom to flap up. That direct up-and-down control is what gives the game its skill ceiling — you can hover, feint, and thread gaps a single-button game never could. The full breakdown is on the <a class="inline" href="/how-to-play.html">How to Play</a> page.</p>
