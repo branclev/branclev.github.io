@@ -39,6 +39,27 @@
   .copy { color:#ffffff55; font-size:12px; margin-top:18px; }
   @media (max-width:520px){ .cards { grid-template-columns:1fr; } }
 </style>
+<!-- Structured data for the trailer. Google will not surface a video result for
+     an embed it can only infer from an <iframe>; VideoObject is what makes the
+     page eligible. Also gives the crawler a second, independent signal that this
+     page has real media content on it. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Neon Drift — gameplay trailer",
+  "description": "Neon Drift is a free neon arcade flyer with dual-zone tap controls, a daily challenge, Projectile Storm, head-to-head Versus and a live Last Pilot Standing battle royale. Play free in your browser at neondriftgame.com.",
+  "thumbnailUrl": "https://i.ytimg.com/vi/vipywTlXwmk/maxresdefault.jpg",
+  "uploadDate": "2026-08-12",
+  "embedUrl": "https://www.youtube.com/embed/vipywTlXwmk",
+  "contentUrl": "https://www.youtube.com/watch?v=vipywTlXwmk",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neon Drift",
+    "url": "https://neondriftgame.com/"
+  }
+}
+</script>
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
         crossorigin="anonymous"></script>
@@ -56,10 +77,6 @@
   </div>
 
   <!-- ── TRAILER ──────────────────────────────────────────────────────────
-       TO ENABLE: replace YOUTUBE_ID_HERE below with the video id (the part
-       after v= in the YouTube URL) and delete the style="display:none" on the
-       <section>. Nothing else needs changing.
-
        Deliberately a YOUTUBE EMBED, not a self-hosted file:
          - GitHub Pages has a soft bandwidth limit and is not a video host; a
            popular trailer served from here would be throttled or flagged.
@@ -72,12 +89,12 @@
        Uses youtube-nocookie.com and loading="lazy": no cookie is set until the
        viewer actually presses play, which keeps the privacy policy accurate.
   ──────────────────────────────────────────────────────────────────────── -->
-  <section id="trailer" style="display:none;">
+  <section id="trailer">
     <h2>Watch it in motion</h2>
     <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border:1px solid #00f5ff22;background:#05000c;">
       <iframe
         style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
-        src="https://www.youtube-nocookie.com/embed/YOUTUBE_ID_HERE"
+        src="https://www.youtube-nocookie.com/embed/vipywTlXwmk"
         title="Neon Drift — gameplay trailer"
         loading="lazy"
         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
