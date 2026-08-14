@@ -49,7 +49,7 @@
 <h1>Neon Drift Leaderboards</h1>
 <p class="sub">Live standings, pulled straight from the game.</p>
 
-<p>Every score below was set by a real player in Neon Drift. Classic and Projectile Storm each keep an <strong>all-time</strong> board and a <strong>this week</strong> board that resets every Monday, the <strong>Daily Challenge</strong> ranks today's single seeded course, and <strong>Last Pilot Standing</strong> ranks players by battle royale wins rather than score.</p>
+<p>Every score below was set by a real player in Neon Drift, and the boards page through the full standings rather than stopping at the top hundred. Classic and Projectile Storm each keep an <strong>all-time</strong> board and a <strong>this week</strong> board that resets every Monday, the <strong>Daily Challenge</strong> ranks today's single seeded course, and <strong>Last Pilot Standing</strong> ranks players by battle royale wins rather than score.</p>
 
 <div class="controls">
   <select id="board" aria-label="Leaderboard">
@@ -75,6 +75,12 @@
   </thead>
   <tbody id="rows"><tr><td colspan="4" class="state">Loading leaderboard…</td></tr></tbody>
 </table>
+
+<div class="controls" id="pager" style="justify-content:space-between;align-items:center;margin-top:10px;">
+  <button id="prev" type="button">← Previous</button>
+  <span id="pageInfo" style="color:#ffffff66;font-size:13px;"></span>
+  <button id="next" type="button">Next →</button>
+</div>
 
 <h2>What the percentile filter does</h2>
 <p>The <strong>top 1%</strong> and <strong>top 10%</strong> filters apply to the <strong>all-time Classic board only</strong> — that is the board the in-game <strong>[1%]</strong> and <strong>[10%]</strong> titles are derived from, so it is the only place the bands mean anything. The cut is made on <em>score</em>, not on rank, so everyone sharing the boundary score qualifies together and nobody loses a place to a tiebreak. The population counts players who have posted a score above zero.</p>
@@ -113,8 +119,15 @@
   var metaEl = document.getElementById('meta');
   var scoreHead = document.getElementById('scoreHead');
   var refreshBtn = document.getElementById('refresh');
+  var prevBtn = document.getElementById('prev');
+  var nextBtn = document.getElementById('next');
+  var pageInfo = document.getElementById('pageInfo');
+  var pagerEl = document.getElementById('pager');
 
-  var pct = null;   // { scoringPlayers, top1, top10 }
+  var pct = null;      // { scoringPlayers, top1, top10 }
+  var PAGE = 100;      // the server caps a page at 100 rows; this must not exceed it
+  var offset = 0;      // rank offset of the first row currently shown
+  var total = null;    // total rows on the selected board, from the server
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -150,9 +163,12 @@
     state('Loading leaderboard…');
     metaEl.textContent = 'Loading…';
 
+    // Last Pilot Standing is a different route with an aggregated shape and no
+    // paging support, so it is always a single page.
     var url = mode === 'lastpilot'
-      ? API + '/lastpilot/leaderboard?limit=100'
-      : API + '/scores?mode=' + encodeURIComponent(mode) + '&period=' + encodeURIComponent(period) + '&limit=100';
+      ? API + '/lastpilot/leaderboard'
+      : API + '/scores?mode=' + encodeURIComponent(mode) + '&period=' + encodeURIComponent(period)
+        + '&limit=' + PAGE + '&offset=' + offset;
 
     // Thresholds are only needed for the Classic all-time view; every other
     // board skips the request entirely.
@@ -163,6 +179,7 @@
     Promise.all([fetchJson(url), pctReq]).then(function (res) {
       var data = res[0];
       if (res[1]) pct = res[1];
+      total = (typeof data.total === 'number') ? data.total : null;
       render(mode, data.leaderboard || []);
     }).catch(function () {
       state('Could not load the leaderboard just now. Try Refresh in a moment.');
@@ -188,14 +205,16 @@
     }
 
     if (!shown.length) {
-      state(band === 'all'
-        ? 'No scores on this board yet.'
-        : 'Nobody is in this band yet.');
+      state(band !== 'all'
+        ? 'Nobody is in this band yet.'
+        : offset > 0
+          ? 'No more players past this point.'
+          : 'No scores on this board yet.');
     } else {
       var html = '';
       for (var i = 0; i < shown.length; i++) {
         var r = shown[i];
-        var rank = i + 1;
+        var rank = offset + i + 1;   // absolute, not per-page
         var rc = rank === 1 ? ' r1' : rank === 2 ? ' r2' : rank === 3 ? ' r3' : '';
         var name = esc(r.callsign || r.username || '');
         var badge = r.title ? '<span class="badge">' + esc(titleLabel(r.title)) + '</span>' : '';
@@ -216,6 +235,7 @@
     if (warning) bits.push(warning);
     bits.push('updated ' + new Date().toLocaleTimeString());
     metaEl.textContent = bits.join(' · ');
+    renderPager(isLps, rows.length);
   }
 
   // Labels mirror TITLES in the game. Anything unrecognised renders as nothing
@@ -225,9 +245,45 @@
     return { OG: '[OG]', TOP1: '[1%]', TOP10: '[10%]' }[id] || '';
   }
 
-  boardEl.addEventListener('change', function () { syncBandControl(); load(); });
-  bandEl.addEventListener('change', function () { load(); });
-  refreshBtn.addEventListener('click', load);
+  // The pager describes the BOARD, not the filtered view: the percentile filter
+  // narrows what is shown from the page already fetched, so paging past it would
+  // be paging through a subset of a subset. It is hidden while a band is active.
+  function renderPager(isLps, fetchedRows) {
+    var filtered = bandApplies() && bandEl.value !== 'all';
+    if (isLps || filtered) { pagerEl.style.display = 'none'; return; }
+    var known = (typeof total === 'number');
+    var more = known ? (offset + PAGE < total) : (fetchedRows === PAGE);
+    if (offset === 0 && !more) { pagerEl.style.display = 'none'; return; }
+
+    pagerEl.style.display = 'flex';
+    prevBtn.disabled = offset === 0;
+    nextBtn.disabled = !more;
+    prevBtn.style.opacity = prevBtn.disabled ? '0.4' : '1';
+    nextBtn.style.opacity = nextBtn.disabled ? '0.4' : '1';
+    var first = offset + 1;
+    var last = offset + fetchedRows;
+    pageInfo.textContent = known
+      ? ('Ranks ' + first + '–' + last + ' of ' + total)
+      : ('Ranks ' + first + '–' + last);
+  }
+
+  // Any change of board or filter returns to the first page. Staying on page 3
+  // while switching to a board with two pages would show an empty table.
+  function resetAndLoad() { offset = 0; load(); }
+
+  boardEl.addEventListener('change', function () { syncBandControl(); resetAndLoad(); });
+  bandEl.addEventListener('change', resetAndLoad);
+  refreshBtn.addEventListener('click', function () { offset = 0; load(); });
+  prevBtn.addEventListener('click', function () {
+    offset = Math.max(0, offset - PAGE);
+    load();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  nextBtn.addEventListener('click', function () {
+    offset = offset + PAGE;
+    load();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   syncBandControl();
   load();
