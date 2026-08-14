@@ -40,12 +40,67 @@
   .badge { color:#ffd24a; font-weight:700; font-size:0.85em; letter-spacing:1px; margin-right:5px; }
   .band { color:#ff6ec7; font-size:11px; letter-spacing:1px; margin-left:6px; }
   .state { color:#ffffff77; padding:18px 6px; font-size:14px; }
+
+  /* ── Top tab bar ──────────────────────────────────────────
+     Sticky, horizontally scrollable on narrow screens, and present on EVERY
+     page including the legal ones — those are not tabs, but they must not be
+     dead ends either. Deliberately limited to the six pages a player would
+     actually want: About / Contact / Support / Privacy / Delete data stay in
+     the footer, which is where people look for them and where AdSense and
+     Play expect the privacy link to be. */
+  nav.tabs {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 6px; align-items: center;
+    margin: 0 0 26px; padding: 10px 0;
+    background: rgba(10,0,20,0.94);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #00f5ff22;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a {
+    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
+    text-decoration: none;
+  }
+  nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
+  nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  nav.tabs a.play {
+    color: #0a0014; font-weight: 800;
+    background: linear-gradient(135deg,#ff2d78,#ff6ec7);
+    box-shadow: 0 0 14px #ff2d7844;
+  }
+  nav.tabs a.play:hover { color: #0a0014; border-color: transparent; }
+  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+
+  /* Footer holds the secondary and legal links. The six main pages live in the
+     tab bar at the top, so repeating them down here was noise — but Privacy and
+     Delete My Data must stay reachable from every page: Play requires the
+     privacy link and AdSense reads it. */
+  nav.foot {
+    margin-top: 48px; padding-top: 20px; border-top: 1px solid #00f5ff22;
+    font-size: 13px; line-height: 2.2; color: #6c7a90;
+  }
+  nav.foot a { color: #7f8fa6; margin-right: 16px; white-space: nowrap; }
+  nav.foot a:hover { color: #00f5ff; }
+  nav.foot span { color: #4a5568; margin-right: 16px; white-space: nowrap; }
 </style>
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
         crossorigin="anonymous"></script>
 </head>
 <body>
+<nav class="tabs">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks</a>
+  <a href="/leaderboard.html" class="active">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="/NeonDrift/" class="play">▶ Play</a>
+</nav>
 <h1>Neon Drift Leaderboards</h1>
 <p class="sub">Live standings, pulled straight from the game.</p>
 
@@ -91,17 +146,13 @@
 
 <a class="cta" href="/NeonDrift/">▶ Play Neon Drift</a>
 
-<nav class="site">
-  <a href="/">Home</a>
-  <a href="/how-to-play.html">How to Play</a>
-  <a href="/game-modes.html">Game Modes</a>
-  <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>
-  <a href="/leaderboard.html">Leaderboards</a>
-  <a href="/devlog.html">Devlog</a>
-  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+<nav class="foot">
   <a href="/about.html">About</a>
   <a href="/contact.html">Contact</a>
-  <a href="/privacy-policy.html">Privacy</a>
+  <a href="/support.html">Support</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/delete-data.html">Delete My Data</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
 </nav>
 
 <script>
