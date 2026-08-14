@@ -25,28 +25,41 @@
   nav.tabs {
     position: sticky; top: 0; z-index: 20;
     display: flex; gap: 6px; align-items: center;
-    margin: 0 0 26px; padding: 10px 0;
-    background: rgba(10,0,20,0.94);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    /* 712px = the 760px content column minus its 24px side padding, so the bar
+       lines up with the text on EVERY page. index.html is the reason this is
+       needed: there the column is a .wrap div and <body> is full-width, so
+       without this the bar stretched edge to edge and sat left of everything. */
+    max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
+    box-sizing: border-box;
+    /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
+       a well-known way to get a vanishing or flickering header on mobile
+       Safari, and the blur bought nothing over a solid colour here. */
+    background: #0a0014;
     border-bottom: 1px solid #00f5ff22;
     overflow-x: auto; -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    /* Cannot collapse to nothing even if a child is mis-sized. */
+    min-height: 56px;
   }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs a {
     flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
     font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
     color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
-    text-decoration: none;
+    text-decoration: none; margin: 0; line-height: 1.4;
   }
   nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
   nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
-  nav.tabs a.play {
-    color: #0a0014; font-weight: 800;
+  /* 🔴 NOT class="play". index.html already owns .play for the big
+     "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
+     inherited here it pushed the bar to 106px tall and knocked this button out
+     of line with the other tabs. Keep this name distinct. */
+  nav.tabs a.tab-play {
+    color: #0a0014; font-weight: 800; margin: 0;
     background: linear-gradient(135deg,#ff2d78,#ff6ec7);
     box-shadow: 0 0 14px #ff2d7844;
   }
-  nav.tabs a.play:hover { color: #0a0014; border-color: transparent; }
+  nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
   @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
 
   /* Footer holds the secondary and legal links. The six main pages live in the
@@ -73,7 +86,7 @@
   <a href="/unlocks-and-skins.html">Unlocks</a>
   <a href="/leaderboard.html">Leaderboards</a>
   <a href="/devlog.html">Devlog</a>
-  <a href="/NeonDrift/" class="play">▶ Play</a>
+  <a href="/NeonDrift/" class="tab-play">▶ Play</a>
 </nav>
 <h1>Contact Us</h1>
 <p class="sub">We'd love to hear from you.</p>
