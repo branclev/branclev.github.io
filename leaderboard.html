@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Drift Leaderboards — Live Classic, Storm &amp; Daily Rankings</title>
+<link rel="canonical" href="https://neondriftgame.com/leaderboard.html">
+<meta name="description" content="Live Neon Drift leaderboards: all-time and weekly Classic, Projectile Storm, today's Daily Challenge and Last Pilot Standing wins. Filter Classic by the top 1% and top 10% of players.">
+<style>
+  body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:760px; margin:0 auto; padding:40px 24px 60px; line-height:1.7;
+         background-image:radial-gradient(ellipse 60% 30% at 50% 0%, rgba(255,45,120,0.12), transparent 70%); }
+  h1 { color:#ff2d78; text-shadow:0 0 12px #ff2d7888; font-size:30px; margin-bottom:4px; }
+  h2 { color:#00f5ff; font-size:20px; margin-top:34px; }
+  a { color:#00f5ff; text-decoration:none; } a:hover { text-decoration:underline; }
+  .sub { color:#ffffff88; font-size:14px; margin-bottom:24px; }
+  strong { color:#fff; }
+  ul { padding-left:22px; } li { margin-bottom:8px; }
+  .cta { display:inline-block; margin:24px 0 8px; padding:12px 28px; border-radius:8px; background:linear-gradient(135deg,#ff2d78,#ff6ec7); color:#0a0014; font-weight:700; letter-spacing:1px; }
+  nav.site { margin-top:48px; padding-top:22px; border-top:1px solid #00f5ff22; font-size:14px; line-height:2.2; }
+  nav.site a { margin-right:16px; white-space:nowrap; }
+
+  .controls { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 6px; }
+  .controls select, .controls button {
+    background:#12081f; color:#e8e8ff; border:1px solid #00f5ff44; border-radius:6px;
+    padding:9px 12px; font-size:14px; font-family:inherit; cursor:pointer; }
+  .controls select:hover, .controls button:hover { border-color:#00f5ff; }
+  .controls button { color:#00f5ff; }
+  .meta { color:#ffffff66; font-size:12.5px; margin-bottom:14px; }
+
+  table.lb { width:100%; border-collapse:collapse; margin-top:6px; }
+  table.lb th { text-align:left; font-size:12px; letter-spacing:1px; color:#ffffff66;
+                text-transform:uppercase; border-bottom:1px solid #00f5ff22; padding:8px 6px; font-weight:600; }
+  table.lb td { padding:9px 6px; border-bottom:1px solid #ffffff0d; font-size:15px; }
+  table.lb tr:hover td { background:rgba(0,245,255,0.04); }
+  .rank { color:#ffffff77; width:44px; }
+  .rank.r1 { color:#ffd700; font-weight:700; } .rank.r2 { color:#c0c0c0; font-weight:700; } .rank.r3 { color:#cd7f32; font-weight:700; }
+  .score { text-align:right; color:#00f5ff; font-weight:700; white-space:nowrap; }
+  .lvl { color:#ffffff55; font-size:13px; text-align:right; white-space:nowrap; }
+  .badge { color:#ffd24a; font-weight:700; font-size:0.85em; letter-spacing:1px; margin-right:5px; }
+  .band { color:#ff6ec7; font-size:11px; letter-spacing:1px; margin-left:6px; }
+  .state { color:#ffffff77; padding:18px 6px; font-size:14px; }
+</style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>Neon Drift Leaderboards</h1>
+<p class="sub">Live standings, pulled straight from the game.</p>
+
+<p>Every score below was set by a real player in Neon Drift. Classic and Projectile Storm each keep an <strong>all-time</strong> board and a <strong>this week</strong> board that resets every Monday, the <strong>Daily Challenge</strong> ranks today's single seeded course, and <strong>Last Pilot Standing</strong> ranks players by battle royale wins rather than score.</p>
+
+<div class="controls">
+  <select id="board" aria-label="Leaderboard">
+    <option value="normal|alltime">Classic — All time</option>
+    <option value="normal|weekly">Classic — This week</option>
+    <option value="storm|alltime">Projectile Storm — All time</option>
+    <option value="storm|weekly">Projectile Storm — This week</option>
+    <option value="daily|alltime">Daily Challenge — Today</option>
+    <option value="lastpilot|alltime">Last Pilot Standing — Wins</option>
+  </select>
+  <select id="band" aria-label="Percentile filter">
+    <option value="all">All players</option>
+    <option value="top10">Top 10% only</option>
+    <option value="top1">Top 1% only</option>
+  </select>
+  <button id="refresh" type="button">Refresh</button>
+</div>
+<div class="meta" id="meta">Loading…</div>
+
+<table class="lb">
+  <thead>
+    <tr><th class="rank">#</th><th>Pilot</th><th style="text-align:right;">Level</th><th style="text-align:right;" id="scoreHead">Score</th></tr>
+  </thead>
+  <tbody id="rows"><tr><td colspan="4" class="state">Loading leaderboard…</td></tr></tbody>
+</table>
+
+<h2>What the percentile filter does</h2>
+<p>The <strong>top 1%</strong> and <strong>top 10%</strong> filters apply to the <strong>all-time Classic board only</strong> — that is the board the in-game <strong>[1%]</strong> and <strong>[10%]</strong> titles are derived from, so it is the only place the bands mean anything. The cut is made on <em>score</em>, not on rank, so everyone sharing the boundary score qualifies together and nobody loses a place to a tiebreak. The population counts players who have posted a score above zero.</p>
+<p>Those bands are live standings, not permanent awards. Players who equip the matching title in game keep it only while they remain in range — drop out and the badge comes off, climb back and it returns.</p>
+
+<h2>About the titles you'll see</h2>
+<p>A badge before a pilot's name is a <strong>title</strong>. <strong>[OG]</strong> marks an account linked before launch and can never be earned again once the game is out. <strong>[1%]</strong> and <strong>[10%]</strong> are the leaderboard bands above. Titles are optional — plenty of players have one and choose not to wear it, so an unbadged name near the top is not a mistake. Read more on <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>.</p>
+
+<a class="cta" href="/NeonDrift/">▶ Play Neon Drift</a>
+
+<nav class="site">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>
+  <a href="/leaderboard.html">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy-policy.html">Privacy</a>
+</nav>
+
+<script>
+(function () {
+  // Same public endpoint and publishable key the game itself uses. The key is
+  // already public in the game client; it grants nothing beyond these read
+  // routes, which return data that is a leaderboard by definition.
+  var API = 'https://jgycumfqpnwrvprkbukp.supabase.co/functions/v1/submit-score';
+  var KEY = 'sb_publishable_mKs1Q2FmC0EXVjQ1_-vj0w_2GhYhap5';
+  var HEADERS = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY };
+
+  var boardEl = document.getElementById('board');
+  var bandEl = document.getElementById('band');
+  var rowsEl = document.getElementById('rows');
+  var metaEl = document.getElementById('meta');
+  var scoreHead = document.getElementById('scoreHead');
+  var refreshBtn = document.getElementById('refresh');
+
+  var pct = null;   // { scoringPlayers, top1, top10 }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function state(msg) { rowsEl.innerHTML = '<tr><td colspan="4" class="state">' + esc(msg) + '</td></tr>'; }
+
+  // The percentile bands only exist on the all-time Classic board, which is
+  // what the in-game titles derive from. Anywhere else the control is disabled
+  // rather than hidden, so it does not appear and vanish as you switch boards.
+  function bandApplies() { return boardEl.value === 'normal|alltime'; }
+
+  function syncBandControl() {
+    var on = bandApplies();
+    bandEl.disabled = !on;
+    bandEl.style.opacity = on ? '1' : '0.45';
+    if (!on) bandEl.value = 'all';
+    scoreHead.textContent = boardEl.value === 'lastpilot|alltime' ? 'Wins' : 'Score';
+  }
+
+  function fetchJson(url) {
+    return fetch(url, { headers: HEADERS }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  function load() {
+    var parts = boardEl.value.split('|');
+    var mode = parts[0], period = parts[1];
+    refreshBtn.disabled = true;
+    state('Loading leaderboard…');
+    metaEl.textContent = 'Loading…';
+
+    var url = mode === 'lastpilot'
+      ? API + '/lastpilot/leaderboard?limit=100'
+      : API + '/scores?mode=' + encodeURIComponent(mode) + '&period=' + encodeURIComponent(period) + '&limit=100';
+
+    // Thresholds are only needed for the Classic all-time view; every other
+    // board skips the request entirely.
+    var pctReq = bandApplies() && !pct
+      ? fetchJson(API + '/leaderboard/percentiles').catch(function () { return null; })
+      : Promise.resolve(pct);
+
+    Promise.all([fetchJson(url), pctReq]).then(function (res) {
+      var data = res[0];
+      if (res[1]) pct = res[1];
+      render(mode, data.leaderboard || []);
+    }).catch(function () {
+      state('Could not load the leaderboard just now. Try Refresh in a moment.');
+      metaEl.textContent = '';
+    }).then(function () { refreshBtn.disabled = false; });
+  }
+
+  function render(mode, rows) {
+    var isLps = mode === 'lastpilot';
+    var band = bandApplies() ? bandEl.value : 'all';
+    var threshold = null;
+    if (band === 'top1' && pct) threshold = pct.top1;
+    if (band === 'top10' && pct) threshold = pct.top10;
+
+    var shown = rows;
+    var warning = '';
+    if (threshold != null) {
+      shown = rows.filter(function (r) { return (r.score || 0) >= threshold; });
+    } else if (band !== 'all') {
+      // Thresholds could not be fetched, so fall back to the full board rather
+      // than silently showing an empty or wrongly-filtered list.
+      warning = 'percentile data unavailable — showing all players';
+    }
+
+    if (!shown.length) {
+      state(band === 'all'
+        ? 'No scores on this board yet.'
+        : 'Nobody is in this band yet.');
+    } else {
+      var html = '';
+      for (var i = 0; i < shown.length; i++) {
+        var r = shown[i];
+        var rank = i + 1;
+        var rc = rank === 1 ? ' r1' : rank === 2 ? ' r2' : rank === 3 ? ' r3' : '';
+        var name = esc(r.callsign || r.username || '');
+        var badge = r.title ? '<span class="badge">' + esc(titleLabel(r.title)) + '</span>' : '';
+        var value = isLps ? (r.wins || 0) : (r.score || 0);
+        var lvl = (!isLps && r.level != null) ? esc(r.level) : '';
+        html += '<tr><td class="rank' + rc + '">' + rank + '</td>'
+              + '<td>' + badge + name + '</td>'
+              + '<td class="lvl">' + lvl + '</td>'
+              + '<td class="score">' + esc(value) + '</td></tr>';
+      }
+      rowsEl.innerHTML = html;
+    }
+
+    var bits = [];
+    bits.push(shown.length + (shown.length === 1 ? ' pilot' : ' pilots'));
+    if (threshold != null) bits.push('score ' + threshold + ' or better');
+    if (bandApplies() && pct && pct.scoringPlayers) bits.push(pct.scoringPlayers + ' ranked players in total');
+    if (warning) bits.push(warning);
+    bits.push('updated ' + new Date().toLocaleTimeString());
+    metaEl.textContent = bits.join(' · ');
+  }
+
+  // Labels mirror TITLES in the game. Anything unrecognised renders as nothing
+  // rather than a raw id, so a title added in game before this page is updated
+  // degrades quietly instead of showing "TOP1" to a stranger.
+  function titleLabel(id) {
+    return { OG: '[OG]', TOP1: '[1%]', TOP10: '[10%]' }[id] || '';
+  }
+
+  boardEl.addEventListener('change', function () { syncBandControl(); load(); });
+  bandEl.addEventListener('change', function () { load(); });
+  refreshBtn.addEventListener('click', load);
+
+  syncBandControl();
+  load();
+})();
+</script>
+</body>
+</html>
