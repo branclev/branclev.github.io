@@ -37,6 +37,40 @@
   .rank.r1 { color:#ffd700; font-weight:700; } .rank.r2 { color:#c0c0c0; font-weight:700; } .rank.r3 { color:#cd7f32; font-weight:700; }
   .score { text-align:right; color:#00f5ff; font-weight:700; white-space:nowrap; }
   .lvl { color:#ffffff55; font-size:13px; text-align:right; white-space:nowrap; }
+
+  /* Prestige insignia — mirrors .pmark in the game's index.html. Sized up from
+     15px to 18px because this page renders at desktop text sizes, not the
+     390px-wide phone canvas. Bronze P1-3, silver P4-6, gold P7-9, animated
+     diamond at P10; 1-3 chevrons per metal. */
+  .pmark { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+           width:18px; vertical-align:middle; line-height:0; margin-right:7px; }
+  .pmark i { display:block; width:7px; height:7px; border-top:2px solid currentColor;
+             border-left:2px solid currentColor; transform:rotate(45deg); margin-bottom:-2.5px;
+             filter:drop-shadow(0 0 2px currentColor); }
+  .pmark i:last-child { margin-bottom:0; }
+  .pmark.b { color:#cd7f32; } .pmark.s { color:#c8d4e2; } .pmark.g { color:#ffd700; }
+  .pmark.p10 { color:#6cc8ff; }
+  .pmark .pdia { position:relative; overflow:hidden; width:13px; height:13px; border:0; margin:0;
+    transform:rotate(45deg);
+    background:linear-gradient(90deg,#1f7fd4,#8fdcff,#ffffff,#ffd6ff,#8fe6ff,#1f7fd4);
+    background-size:320% 100%;
+    animation:pDiaSweep 2.2s linear infinite, pDiaBreath 2.2s ease-in-out infinite; }
+  .pmark .pglint { position:absolute; top:-20%; left:0; width:34%; height:140%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.92),transparent);
+    animation:pGlint 2.2s ease-in-out infinite; }
+  @keyframes pDiaSweep { from{background-position:0% 50%} to{background-position:320% 50%} }
+  @keyframes pDiaBreath {
+    0%,100%{ transform:rotate(45deg) scale(1);    filter:drop-shadow(0 0 3px #1f7fd4); }
+    50%    { transform:rotate(45deg) scale(1.16); filter:drop-shadow(0 0 8px #8fdcff) drop-shadow(0 0 16px #1f7fd4); } }
+  @keyframes pGlint {
+    0%,60%{ opacity:0; transform:translateX(-150%); }
+    72%   { opacity:1; }
+    88%,100%{ opacity:0; transform:translateX(160%); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pmark .pdia { animation:none; background-position:45% 50%; transform:rotate(45deg);
+                   filter:drop-shadow(0 0 4px #6cc8ff); }
+    .pmark .pglint { display:none; }
+  }
   .badge { color:#ffd24a; font-weight:700; font-size:0.85em; letter-spacing:1px; margin-right:5px; }
   .band { color:#ff6ec7; font-size:11px; letter-spacing:1px; margin-left:6px; }
   .state { color:#ffffff77; padding:18px 6px; font-size:14px; }
@@ -155,7 +189,21 @@
 <p>Those bands are live standings, not permanent awards. Players who equip the matching title in game keep it only while they remain in range — drop out and the badge comes off, climb back and it returns.</p>
 
 <h2>About the titles you'll see</h2>
-<p>A badge before a pilot's name is a <strong>title</strong>. <strong>[OG]</strong> marks an account linked before launch and can never be earned again once the game is out. <strong>[1%]</strong> and <strong>[10%]</strong> are the leaderboard bands above. Titles are optional — plenty of players have one and choose not to wear it, so an unbadged name near the top is not a mistake. Read more on <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>.</p>
+<p>A badge before a pilot's name is a <strong>title</strong>. <strong>[OG]</strong> marks an account linked before launch and can never be earned again once the game is out. <strong>[1%]</strong> and <strong>[10%]</strong> are the leaderboard bands above, <strong>[CHAOS]</strong> is the top 10% of all-time Projectile Storm, <strong>[VET]</strong> means level 100 reached, and <strong>[REAL1]</strong> marks a player who supported the game with a purchase. Titles are optional — plenty of players have one and choose not to wear it, so an unbadged name near the top is not a mistake. Read more on <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>.</p>
+
+<h2>Prestige — what the chevrons mean</h2>
+<p>Level caps at <strong>100</strong>. Reaching it starts a <strong>prestige</strong>: the level shown next to your name goes back to 1, and a rank insignia appears beside it. Your total XP is never reset, so every skin, pipe design and background you unlocked by level stays unlocked — only the number on display starts over. Each prestige costs the same XP as levels 1&ndash;100 did, so the climb does not get slower, only longer.</p>
+<table class="lb" style="max-width:460px;">
+  <thead><tr><th style="text-align:left;">Insignia</th><th style="text-align:left;">Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pmark b"><i></i></span><span class="pmark b"><i></i><i></i></span><span class="pmark b"><i></i><i></i><i></i></span></td><td>Bronze, 1&ndash;3 chevrons &mdash; prestige 1, 2, 3</td></tr>
+    <tr><td><span class="pmark s"><i></i></span><span class="pmark s"><i></i><i></i></span><span class="pmark s"><i></i><i></i><i></i></span></td><td>Silver, 1&ndash;3 chevrons &mdash; prestige 4, 5, 6</td></tr>
+    <tr><td><span class="pmark g"><i></i></span><span class="pmark g"><i></i><i></i></span><span class="pmark g"><i></i><i></i><i></i></span></td><td>Gold, 1&ndash;3 chevrons &mdash; prestige 7, 8, 9</td></tr>
+    <tr><td><span class="pmark p10"><i class="pdia"><b class="pglint"></b></i></span></td><td>Blue diamond &mdash; <strong>prestige 10</strong>, the highest rank in the game</td></tr>
+  </tbody>
+</table>
+<p>Prestige 10 is a finish line rather than a step: it stops there, at P10/100, and nothing beyond it accrues. Reaching it takes roughly <strong>3.07 million</strong> lifetime XP.</p>
+<p>Prestige is worked out on the server from the XP stored against your <strong>linked account</strong>, which is what makes it impossible to fake &mdash; and also what means an unlinked player has none to show. Linking is free and takes a moment; it is also the only way your XP is backed up at all.</p>
 
 <a class="cta" href="/NeonDrift/">▶ Play Neon Drift</a>
 
@@ -286,7 +334,7 @@
         var lvl = (!isLps && r.level != null) ? esc(r.level) : '';
         html += '<tr><td class="rank' + rc + '">' + rank + '</td>'
               + '<td>' + badge + name + '</td>'
-              + '<td class="lvl">' + lvl + '</td>'
+              + '<td class="lvl">' + prestigeMark(r.prestige) + lvl + '</td>'
               + '<td class="score">' + esc(value) + '</td></tr>';
       }
       rowsEl.innerHTML = html;
@@ -306,7 +354,21 @@
   // rather than a raw id, so a title added in game before this page is updated
   // degrades quietly instead of showing "TOP1" to a stranger.
   function titleLabel(id) {
-    return { OG: '[OG]', TOP1: '[1%]', TOP10: '[10%]' }[id] || '';
+    return { OG: '[OG]', TOP1: '[1%]', TOP10: '[10%]',
+             CHAOS: '[CHAOS]', VET: '[VET]', REAL1: '[REAL1]' }[id] || '';
+  }
+
+  // Mirrors prestigeMark() in the game. Takes the PRESTIGE the server derived
+  // from stored XP, not the level — the level column here is already the
+  // within-prestige display level, so the two are not interchangeable.
+  function prestigeMark(p) {
+    var n = Math.max(0, Math.min(10, Math.floor(Number(p) || 0)));
+    if (!n) return '';
+    if (n >= 10) return '<span class="pmark p10" title="Prestige 10 — max"><i class="pdia"><b class="pglint"></b></i></span>';
+    var tier = n <= 3 ? 'b' : n <= 6 ? 's' : 'g';
+    var count = ((n - 1) % 3) + 1;
+    return '<span class="pmark ' + tier + '" title="Prestige ' + n + '">' +
+           new Array(count + 1).join('<i></i>') + '</span>';
   }
 
   // The pager describes the BOARD, not the filtered view: the percentile filter
