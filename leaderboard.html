@@ -185,8 +185,10 @@
 </div>
 
 <h2>What the percentile filter does</h2>
-<p>The <strong>top 1%</strong> and <strong>top 10%</strong> filters apply to the <strong>all-time Classic board only</strong> — that is the board the in-game <strong>[1%]</strong> and <strong>[10%]</strong> titles are derived from, so it is the only place the bands mean anything. The cut is made on <em>score</em>, not on rank, so everyone sharing the boundary score qualifies together and nobody loses a place to a tiebreak. The population counts players who have posted a score above zero.</p>
-<p>Those bands are live standings, not permanent awards. Players who equip the matching title in game keep it only while they remain in range — drop out and the badge comes off, climb back and it returns.</p>
+<p>The <strong>top 1%</strong> and <strong>top 10%</strong> filters apply to the two <strong>all-time score boards</strong>: Classic and Projectile Storm. They are switched off on the weekly boards, where there are too few players for a percentile to mean much, on the Daily, which is a single course over a single day, and on Last Pilot Standing, which ranks on wins rather than score.</p>
+<p>Each board is measured against <em>itself</em>. Storm scores run on a completely different scale to Classic, so the top 10% of Storm is a different number entirely &mdash; the two are never compared to each other.</p>
+<p>The cut is made on <em>score</em>, not on rank, so everyone sharing the boundary score qualifies together and nobody loses a place to a tiebreak. The population counts players who have posted a score above zero on that board.</p>
+<p>These bands are live standings, not permanent awards. Three in-game titles come from them &mdash; <strong>[1%]</strong> and <strong>[10%]</strong> from Classic, and <strong>[CHAOS]</strong> from the top 10% of Storm &mdash; and a player who equips one keeps it only while they remain in range. Drop out and the badge comes off; climb back and it returns. There is no title for the top 1% of Storm; that band is a view of the board rather than something you can wear.</p>
 
 <h2>About the titles you'll see</h2>
 <p>A badge before a pilot's name is a <strong>title</strong>. <strong>[OG]</strong> marks an account linked before launch and can never be earned again once the game is out. <strong>[1%]</strong> and <strong>[10%]</strong> are the leaderboard bands above, and <strong>[CHAOS]</strong> is the same idea on the all-time Projectile Storm board &mdash; all three are live standings that come off if a player drops out of range. <strong>[VET]</strong> means level 100 reached and <strong>[REAL1]</strong> marks a player who supported the game with a purchase; those two are permanent. Titles are optional — plenty of players have one and choose not to wear it, so an unbadged name near the top is not a mistake. Read more on <a href="/unlocks-and-skins.html">Unlocks &amp; Skins</a>.</p>
@@ -248,10 +250,35 @@
   }
   function state(msg) { rowsEl.innerHTML = '<tr><td colspan="4" class="state">' + esc(msg) + '</td></tr>'; }
 
-  // The percentile bands only exist on the all-time Classic board, which is
-  // what the in-game titles derive from. Anywhere else the control is disabled
-  // rather than hidden, so it does not appear and vanish as you switch boards.
-  function bandApplies() { return boardEl.value === 'normal|alltime'; }
+  // Percentile bands apply to the two ALL-TIME score boards: Classic and
+  // Projectile Storm. Not to the weekly boards (too few players for a
+  // percentile to mean anything), not to the Daily (one course, one day), and
+  // not to Last Pilot Standing (ranked on wins, not score). Anywhere else the
+  // control is disabled rather than hidden, so it does not appear and vanish
+  // as you switch boards.
+  function bandApplies() {
+    return boardEl.value === 'normal|alltime' || boardEl.value === 'storm|alltime';
+  }
+
+  // Which set of thresholds this board uses.
+  //
+  // 🔴 CLASSIC AND STORM THRESHOLDS ARE NOT INTERCHANGEABLE — Storm scores run
+  // on a different scale entirely, so applying one board's cut to the other
+  // filters wrongly and does it silently, with a plausible-looking result.
+  //
+  // That is why this returns null rather than falling back when `boards` is
+  // missing. It WILL be missing for a while: this page publishes the instant it
+  // is pushed, while the edge function needs a separate deploy, so the two are
+  // routinely out of step. A null here shows the honest "unavailable" notice
+  // and the full board instead of a wrong one.
+  function thresholdsFor(mode) {
+    if (!pct) return null;
+    var key = mode === 'storm' ? 'storm' : 'classic';
+    if (pct.boards && pct.boards[key]) return pct.boards[key];
+    // Pre-2026-08-15 server: only Classic was published, at the top level.
+    if (key === 'classic') return pct;
+    return null;
+  }
 
   function syncBandControl() {
     var on = bandApplies();
@@ -282,8 +309,8 @@
       : API + '/scores?mode=' + encodeURIComponent(mode) + '&period=' + encodeURIComponent(period)
         + '&limit=' + PAGE + '&offset=' + offset;
 
-    // Thresholds are only needed for the Classic all-time view; every other
-    // board skips the request entirely.
+    // One request covers both all-time boards, so switching between Classic and
+    // Storm never re-fetches. Boards without bands skip it entirely.
     var pctReq = bandApplies() && !pct
       ? fetchJson(API + '/leaderboard/percentiles').catch(function () { return null; })
       : Promise.resolve(pct);
@@ -302,9 +329,10 @@
   function render(mode, rows) {
     var isLps = mode === 'lastpilot';
     var band = bandApplies() ? bandEl.value : 'all';
+    var th = thresholdsFor(mode);
     var threshold = null;
-    if (band === 'top1' && pct) threshold = pct.top1;
-    if (band === 'top10' && pct) threshold = pct.top10;
+    if (band === 'top1' && th) threshold = th.top1;
+    if (band === 'top10' && th) threshold = th.top10;
 
     var shown = rows;
     var warning = '';
@@ -343,7 +371,7 @@
     var bits = [];
     bits.push(shown.length + (shown.length === 1 ? ' pilot' : ' pilots'));
     if (threshold != null) bits.push('score ' + threshold + ' or better');
-    if (bandApplies() && pct && pct.scoringPlayers) bits.push(pct.scoringPlayers + ' ranked players in total');
+    if (bandApplies() && th && th.scoringPlayers) bits.push(th.scoringPlayers + ' ranked players in total');
     if (warning) bits.push(warning);
     bits.push('updated ' + new Date().toLocaleTimeString());
     metaEl.textContent = bits.join(' · ');
