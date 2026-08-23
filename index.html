@@ -74,6 +74,12 @@
   }
   nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
   nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  .stores { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin:0 0 34px; }
+  .store-badge { display:inline-block; line-height:0; transition:transform .12s ease, filter .12s ease; }
+  .store-badge img { height:54px; width:auto; display:block; }   /* height fixed, width follows the badge's own ratio — never stretch official artwork */
+  .store-badge:hover { transform:translateY(-2px); filter:brightness(1.12); }
+  @media (max-width:420px) { .store-badge img { height:46px; } }
+
   /* 🔴 NOT class="play". index.html already owns .play for the big
      "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
      inherited here it pushed the bar to 106px tall and knocked this button out
@@ -142,6 +148,33 @@
 
   <div class="center">
     <a class="play" href="/NeonDrift/">▶ PLAY FREE IN YOUR BROWSER</a>
+  </div>
+
+  <!-- ── STORE BADGES ─────────────────────────────────────────────────────
+       Added 2026-08-21, the day the Play listing went public.
+
+       🔴 THIS IS WHY THE SHARE CARD LINKS HERE AND NOT TO A STORE. A share
+       card gets ONE url, and the sender's platform tells you nothing about the
+       recipient's — an Android player sharing to an iPhone would send the wrong
+       link half the time. So the card always sends people to this page, and
+       THIS page offers every route. Do not "improve" the card by
+       platform-detecting at share time.
+
+       The App Store badge is deliberately absent until that listing is public
+       (iOS is held under guideline 2.1). A badge linking nowhere is worse than
+       no badge. Its artwork is already committed alongside the Play one at
+       /NeonDrift/assets/store-badges/app-store.png — when iOS goes live, add
+       the <a> and nothing else changes.
+
+       Badges are the official artwork and MUST NOT be stretched; both stores'
+       guidelines forbid altering it. Height is fixed and width follows from the
+       badge's own 3.34:1 ratio. -->
+  <div class="stores">
+    <a class="store-badge" href="https://play.google.com/store/apps/details?id=io.github.branclev.twa"
+       target="_blank" rel="noopener">
+      <img src="/NeonDrift/assets/store-badges/google-play.png"
+           alt="Get it on Google Play" width="528" height="158">
+    </a>
   </div>
 
   <!-- ── TRAILER ──────────────────────────────────────────────────────────
