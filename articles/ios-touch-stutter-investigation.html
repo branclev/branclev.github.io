@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four wrong answers: debugging an iOS touch stutter that was not my bug | Neon Drift</title>
+<meta name="description" content="A step-by-step debugging story with real measurements: four falsified hypotheses, the control experiment that should have come first, and the finding that iOS drops a frame on every touch.">
+<link rel="canonical" href="https://neondriftgame.com/articles/ios-touch-stutter-investigation.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Four wrong answers: debugging an iOS touch stutter that was not my bug | Neon Drift">
+<meta property="og:description" content="A step-by-step debugging story with real measurements: four falsified hypotheses, the control experiment that should have come first, and the finding that iOS drops a frame on every touch.">
+<meta property="og:url" content="https://neondriftgame.com/articles/ios-touch-stutter-investigation.html">
+<style>
+  body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:720px; margin:0 auto; padding:40px 24px 80px; line-height:1.7; }
+  h1 { color:#ff2d78; text-shadow:0 0 12px #ff2d7888; font-size:28px; }
+  h2 { color:#00f5ff; font-size:19px; margin-top:36px; }
+  a { color:#00f5ff; }
+  .sub { color:#ffffff88; font-size:14px; margin-bottom:32px; }
+  p { margin-bottom:16px; }
+
+  /* ── Top tab bar ──────────────────────────────────────────
+     Sticky, horizontally scrollable on narrow screens, and present on EVERY
+     page including the legal ones — those are not tabs, but they must not be
+     dead ends either. Deliberately limited to the six pages a player would
+     actually want: About / Contact / Support / Privacy / Delete data stay in
+     the footer, which is where people look for them and where AdSense and
+     Play expect the privacy link to be. */
+  nav.tabs {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 6px; align-items: center;
+    /* 712px = the 760px content column minus its 24px side padding, so the bar
+       lines up with the text on EVERY page. index.html is the reason this is
+       needed: there the column is a .wrap div and <body> is full-width, so
+       without this the bar stretched edge to edge and sat left of everything. */
+    max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
+    box-sizing: border-box;
+    /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
+       a well-known way to get a vanishing or flickering header on mobile
+       Safari, and the blur bought nothing over a solid colour here. */
+    background: #0a0014;
+    border-bottom: 1px solid #00f5ff22;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Cannot collapse to nothing even if a child is mis-sized. */
+    min-height: 56px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a {
+    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
+    text-decoration: none; margin: 0; line-height: 1.4;
+  }
+  nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
+  nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  /* 🔴 NOT class="play". index.html already owns .play for the big
+     "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
+     inherited here it pushed the bar to 106px tall and knocked this button out
+     of line with the other tabs. Keep this name distinct. */
+  nav.tabs a.tab-play {
+    color: #0a0014; font-weight: 800; margin: 0;
+    background: linear-gradient(135deg,#ff2d78,#ff6ec7);
+    box-shadow: 0 0 14px #ff2d7844;
+  }
+  nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
+  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+
+  /* Footer holds the secondary and legal links. The six main pages live in the
+     tab bar at the top, so repeating them down here was noise — but Privacy and
+     Delete My Data must stay reachable from every page: Play requires the
+     privacy link and AdSense reads it. */
+  nav.foot {
+    margin-top: 48px; padding-top: 20px; border-top: 1px solid #00f5ff22;
+    font-size: 13px; line-height: 2.2; color: #6c7a90;
+  }
+  nav.foot a { color: #7f8fa6; margin-right: 16px; white-space: nowrap; }
+  nav.foot a:hover { color: #00f5ff; }
+  nav.foot span { color: #4a5568; margin-right: 16px; white-space: nowrap; }
+
+  /* ── Article additions ───────────────────────────────────── */
+  article h2 { margin-top: 40px; }
+  article h3 { color:#ff6ec7; font-size:16px; margin-top:30px; }
+  .meta { color:#6c7a90; font-size:13px; margin:-18px 0 30px; }
+  .lede { font-size:17px; color:#cfd8ea; border-left:3px solid #ff2d78;
+          padding-left:16px; margin:0 0 32px; }
+  pre { background:#12002a; border:1px solid #00f5ff22; border-radius:6px;
+        padding:14px 16px; overflow-x:auto; font-size:13px; line-height:1.5;
+        color:#b8e6ff; margin-bottom:20px; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+         background:#ffffff0d; padding:1px 5px; border-radius:4px; color:#8fe8ff; }
+  pre code { background:none; padding:0; color:inherit; }
+  table { width:100%; border-collapse:collapse; margin:0 0 24px; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #00f5ff1a; }
+  th { color:#00f5ff; font-weight:600; font-size:13px; letter-spacing:.4px; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .callout { background:#ff2d780f; border:1px solid #ff2d7833; border-radius:8px;
+             padding:14px 18px; margin:0 0 24px; }
+  .callout strong { color:#ff6ec7; }
+  ul, ol { margin:0 0 20px 22px; }
+  li { margin-bottom:8px; }
+  .artlist { list-style:none; margin-left:0; }
+  .artlist li { border-bottom:1px solid #00f5ff1a; padding:18px 0; margin:0; }
+  .artlist a { font-size:18px; font-weight:600; text-decoration:none; }
+  .artlist p { color:#9fb0c8; font-size:14px; margin:6px 0 0; }
+  .artlist .when { color:#6c7a90; font-size:12px; letter-spacing:.5px; }
+</style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<nav class="tabs">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks</a>
+  <a href="/leaderboard.html">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="/articles/" class="active">Articles</a>
+  <a href="/NeonDrift/" class="tab-play">▶ Play</a>
+</nav>
+
+<article>
+<h1>Four wrong answers: debugging a stutter that turned out not to be my bug</h1>
+<p class="meta">By Brandon Levy · Neon Drift devlog · August 2026</p>
+
+<p class="lede">A player reported a small stutter every time they tapped. I was confidently
+wrong about the cause four times in a row. The useful part of this story isn't the answer —
+it's the four wrong ones, and what each measurement cost to get.</p>
+
+<p>The report was specific and good, which is rarer than it sounds: <em>"When I tap, there's
+the slightest stutter. If I spam taps, it's more noticeable."</em> On an iPhone&nbsp;17.
+Recent hardware, so not a device-power problem.</p>
+
+<h2>Wrong answer 1: it must be drawing cost</h2>
+
+<p>My game spawns particles on every tap. Reading the code, I found the particle renderer
+was issuing one blurred draw call per particle, uncapped — up to 185 per frame while
+tapping fast. That is a genuine bug and I have <a href="/articles/canvas-shadowblur-performance.html">written
+about it separately</a>.</p>
+
+<p>It fit beautifully. Particles are spawned <em>by input</em>, so the cost scales with tap
+rate, which explains "worse if I spam". I fixed it, removed roughly 185 draw calls per
+frame, and asked the player to retest.</p>
+
+<p>No change at all.</p>
+
+<p>That null result was the single most valuable thing in the whole investigation.
+Eliminating 185 draw calls per frame and changing <em>nothing</em> doesn't just fail to
+confirm the theory — it rules out the entire category. Whatever was happening, frame cost
+wasn't it.</p>
+
+<h2>Building an instrument instead of another theory</h2>
+
+<p>At this point I stopped reading code and built a diagnostic overlay, enabled by a URL
+parameter, that recorded:</p>
+
+<ul>
+  <li>the interval between animation frames, and its median</li>
+  <li>time spent inside the game's own per-frame work</li>
+  <li>a timestamp for every tap</li>
+  <li><strong>how many long frames occurred shortly after a tap, versus at any other time</strong></li>
+</ul>
+
+<p>That last line is the one that matters. Two completely different bugs feel identical here
+and need opposite fixes:</p>
+
+<table>
+<tr><th>Cause</th><th>Long frames near taps?</th><th>Fix</th></tr>
+<tr><td>A real cost spike</td><td>Yes</td><td>Find and batch the expensive thing</td></tr>
+<tr><td>Cadence judder</td><td><strong>None at all</strong></td><td>Interpolate the render</td></tr>
+</table>
+
+<p>Nothing in the source tells you which one you have. A measurement does, immediately.</p>
+
+<p>Two notes on building instruments, both learned the hard way. First, define "long frame"
+relative to <em>that device's own median interval</em>, not a fixed millisecond figure, so
+the same code works on a 60&nbsp;Hz phone and a 165&nbsp;Hz monitor. Second — and I did
+exactly this — my first version computed a median by sorting a 600-element array on every
+frame. <strong>The instrument would have caused the stutter it existed to measure.</strong>
+Cache it and refresh a couple of times a second.</p>
+
+<h2>Wrong answer 2: ProMotion judder</h2>
+
+<p>Armed with the overlay, I formed a better theory. The simulation runs at a fixed
+60&nbsp;Hz; an iPhone&nbsp;17 has a 120&nbsp;Hz display. Each position gets shown twice,
+and if the cadence is uneven — twice, then three times, then twice — you get judder. It's
+the same reason 24&nbsp;fps film looks jerky on a 60&nbsp;Hz TV, and it's invisible until
+something moves fast, which is exactly what a tap causes.</p>
+
+<p>It even predicted a test: a high-refresh desktop should show the same thing.</p>
+
+<p>The desktop capture came back holding each position for <em>three</em> frames — worse
+than the phone's two — and it felt perfectly smooth. My theory predicted the opposite of
+what happened. Dead.</p>
+
+<p>The capture did find something else, though: the game's simulation rate depended on
+monitor refresh rate, a real fairness bug that had been mis-scoped in my notes for two
+weeks. That's <a href="/articles/game-loop-refresh-rate.html">its own article</a>. It was
+not this bug.</p>
+
+<h2>The phone capture, and what it ruled out</h2>
+
+<p>Getting JSON off an iPhone by hand is tedious enough that it was shaping my data — my
+first captures were twelve taps long, far too short to separate anything. So I added an
+upload button that posted the capture straight to a database. That one piece of convenience
+changed the investigation more than any hypothesis did, because it made 120-tap sessions
+free.</p>
+
+<p>With real data, the tap correlation was unambiguous:</p>
+
+<table>
+<tr><th>Measurement</th><th class="num">Value</th></tr>
+<tr><td>Long frames within 150 ms of a tap</td><td class="num">0.628 per 100 ms</td></tr>
+<tr><td>Long frames at any other time</td><td class="num">0.003 per 100 ms</td></tr>
+<tr><td>Taps producing a dropped frame</td><td class="num">93.3%</td></tr>
+<tr><td>Time spent in the game's own frame work</td><td class="num">1 ms median, 5 ms max</td></tr>
+<tr><td>Time spent in the tap handler</td><td class="num">0.08 ms average</td></tr>
+</table>
+
+<p>Roughly every tap dropped a frame — and <strong>97% of that frame was neither my drawing
+code nor my event handler.</strong> My code was using about 1&nbsp;ms of a 17&nbsp;ms
+budget. The time was going somewhere I wasn't measuring.</p>
+
+<h2>Wrong answer 3: the touch listener is blocking the compositor</h2>
+
+<p>Here I found something real. Touch handlers registered as non-passive let you call
+<code>preventDefault()</code>, and to honour that the browser must wait for your handler
+before it can decide whether the page scrolls. The standard fix is to declare
+<code>touch-action: none</code> in CSS and make the listener passive.</p>
+
+<p>And I had a genuine defect: <strong><code>touch-action</code> is not an inherited CSS
+property.</strong> I had set it on <code>html, body</code> and it never reached the canvas.
+So the only thing preventing scroll on my playfield was <code>preventDefault()</code> inside
+a non-passive handler — textbook.</p>
+
+<p>I fixed it, shipped both bindings behind a flag, and had the player capture each.</p>
+
+<p>The passive version looked twice as good. For about ten minutes I thought I'd found it.</p>
+
+<p>Then the player mentioned in passing that in the passive build, <em>each tap was flapping
+twice</em>. Without <code>preventDefault()</code>, iOS still synthesises a mouse event after
+the touch, and I had both listeners attached. Every touch was counted as two taps — which
+doubled the denominator and halved the derived rate.</p>
+
+<p>Correcting for it:</p>
+
+<table>
+<tr><th>Binding</th><th class="num">Long frames per real touch</th></tr>
+<tr><td>Non-passive <code>touchstart</code></td><td class="num">0.964</td></tr>
+<tr><td>Passive <code>touchstart</code></td><td class="num">0.986</td></tr>
+<tr><td><code>pointerdown</code></td><td class="num">0.947</td></tr>
+</table>
+
+<p>Identical. The apparent win was entirely an artifact of my own bug. Without that offhand
+remark I would have shipped a "fix" that fixed nothing and believed it for months.</p>
+
+<p>Two real things did come out of it: the double-flap bug got fixed by moving to
+<code>pointerdown</code>, which has no synthesised twin, and the canvas got its
+<code>touch-action</code> declaration.</p>
+
+<h2>Wrong answer 4: it's garbage collection</h2>
+
+<p>Allocation was the last plausible candidate. Each tap allocated 5–37 objects, and garbage
+collection runs <em>between</em> tasks — precisely where in-frame timers are blind. It would
+explain time that my instrumentation couldn't see.</p>
+
+<p>So I added a flag that kept the tap working but allocated nothing. Result: 1.038 long
+frames per tap, versus 0.950 normally. Unchanged.</p>
+
+<h2>The control that ended it</h2>
+
+<p>I should have run this experiment first. It cost about ten lines.</p>
+
+<p>I added a mode where the tap handler <strong>records the touch and returns immediately</strong>
+— no movement, no particles, no game logic — and sampled while the game sat idle on the menu.</p>
+
+<p>Result: <strong>1.267 long frames per tap.</strong> With the game doing nothing at all.</p>
+
+<p>Then a minimal test page: a canvas, an animation loop, and one listener. Nothing else.</p>
+
+<table>
+<tr><th>Page</th><th class="num">Long frames per touch</th></tr>
+<tr><td>Minimal page (three moving parts)</td><td class="num">1.028</td></tr>
+<tr><td>Minimal page + 3,000 extra DOM elements</td><td class="num">1.907</td></tr>
+<tr><td>My actual game</td><td class="num">0.950 – 1.267</td></tr>
+</table>
+
+<p>Safari and Chrome for iOS agreed to within 3%.</p>
+
+<p>The answer is that <strong>iOS drops roughly one frame on every touch</strong>, before any
+application code runs, and my game was already at that floor. There was nothing to fix.</p>
+
+<p>The heavy variant is the one genuinely actionable finding: DOM complexity nearly
+<em>doubles</em> the per-touch cost. My game measures level with a three-element page today,
+which is a property worth protecting as its menus grow rather than a problem to solve.</p>
+
+<h2>What I'd do differently</h2>
+
+<p><strong>Run the control first.</strong> The ten-line "do nothing and measure" experiment
+would have ended this on day one. I ran it fifth, after four rounds of building fixes for
+causes I'd reasoned my way to. When something correlates with an action, the first question
+should be whether it survives removing everything that action does.</p>
+
+<p><strong>Treat a null result as data.</strong> Removing 185 draw calls and changing nothing
+was more informative than any of my positive theories. It ruled out a whole category. I
+nearly dismissed it as "didn't work" and moved on.</p>
+
+<p><strong>Fix the friction in measurement before the bug.</strong> Twelve-tap captures
+because uploading was annoying meant I couldn't distinguish warm-up from steady-state cost.
+An upload button was fifteen minutes and unblocked everything after it.</p>
+
+<p><strong>Watch for the instrument becoming the bug.</strong> Sorting an array every frame
+inside a stutter diagnostic is funnier in hindsight.</p>
+
+<p><strong>Listen for the offhand remark.</strong> "Each tap was flapping twice" was
+mentioned as an aside, almost as an afterthought, and it invalidated my most promising
+result. If someone tells you something odd about the build you gave them, that is data about
+your experiment, not a side issue.</p>
+
+<p>Four wrong answers is not a great record. But each one was falsified by a measurement
+rather than by argument, and the total cost was a few evenings and a table I can hand to the
+next person who asks. The alternative — shipping the passive-listener "fix" and calling it
+done — would have felt much better and been much worse.</p>
+
+<p><em>Neon Drift is free to play in a browser and on <a href="https://play.google.com/store/apps/details?id=io.github.branclev.twa" rel="noopener">Google Play</a>.
+More build notes in the <a href="/devlog.html">devlog</a>.</em></p>
+</article>
+
+<nav class="foot">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/support.html">Support</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/delete-data.html">Delete My Data</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+</nav>
+</body>
+</html>

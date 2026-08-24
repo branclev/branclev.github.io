@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# Diagnostic pages. Bare test harnesses with no publisher content are exactly
+# what an AdSense reviewer or a search crawler would count against the site,
+# and neither is linked from anywhere.
+Disallow: /NeonDrift/perf-touch-test.html
+
 Sitemap: https://neondriftgame.com/sitemap.xml

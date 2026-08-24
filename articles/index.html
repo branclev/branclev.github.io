@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Articles — technical write-ups from building Neon Drift</title>
+<meta name="description" content="Long-form technical articles on HTML5 canvas performance, game loop timing, and debugging methodology, from the solo developer of the arcade game Neon Drift.">
+<link rel="canonical" href="https://neondriftgame.com/articles/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Articles — technical write-ups from building Neon Drift">
+<meta property="og:description" content="Long-form technical articles on HTML5 canvas performance, game loop timing, and debugging methodology, from the solo developer of the arcade game Neon Drift.">
+<meta property="og:url" content="https://neondriftgame.com/articles/">
+<style>
+  body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:720px; margin:0 auto; padding:40px 24px 80px; line-height:1.7; }
+  h1 { color:#ff2d78; text-shadow:0 0 12px #ff2d7888; font-size:28px; }
+  h2 { color:#00f5ff; font-size:19px; margin-top:36px; }
+  a { color:#00f5ff; }
+  .sub { color:#ffffff88; font-size:14px; margin-bottom:32px; }
+  p { margin-bottom:16px; }
+
+  /* ── Top tab bar ──────────────────────────────────────────
+     Sticky, horizontally scrollable on narrow screens, and present on EVERY
+     page including the legal ones — those are not tabs, but they must not be
+     dead ends either. Deliberately limited to the six pages a player would
+     actually want: About / Contact / Support / Privacy / Delete data stay in
+     the footer, which is where people look for them and where AdSense and
+     Play expect the privacy link to be. */
+  nav.tabs {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 6px; align-items: center;
+    /* 712px = the 760px content column minus its 24px side padding, so the bar
+       lines up with the text on EVERY page. index.html is the reason this is
+       needed: there the column is a .wrap div and <body> is full-width, so
+       without this the bar stretched edge to edge and sat left of everything. */
+    max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
+    box-sizing: border-box;
+    /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
+       a well-known way to get a vanishing or flickering header on mobile
+       Safari, and the blur bought nothing over a solid colour here. */
+    background: #0a0014;
+    border-bottom: 1px solid #00f5ff22;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Cannot collapse to nothing even if a child is mis-sized. */
+    min-height: 56px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a {
+    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
+    text-decoration: none; margin: 0; line-height: 1.4;
+  }
+  nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
+  nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  /* 🔴 NOT class="play". index.html already owns .play for the big
+     "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
+     inherited here it pushed the bar to 106px tall and knocked this button out
+     of line with the other tabs. Keep this name distinct. */
+  nav.tabs a.tab-play {
+    color: #0a0014; font-weight: 800; margin: 0;
+    background: linear-gradient(135deg,#ff2d78,#ff6ec7);
+    box-shadow: 0 0 14px #ff2d7844;
+  }
+  nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
+  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+
+  /* Footer holds the secondary and legal links. The six main pages live in the
+     tab bar at the top, so repeating them down here was noise — but Privacy and
+     Delete My Data must stay reachable from every page: Play requires the
+     privacy link and AdSense reads it. */
+  nav.foot {
+    margin-top: 48px; padding-top: 20px; border-top: 1px solid #00f5ff22;
+    font-size: 13px; line-height: 2.2; color: #6c7a90;
+  }
+  nav.foot a { color: #7f8fa6; margin-right: 16px; white-space: nowrap; }
+  nav.foot a:hover { color: #00f5ff; }
+  nav.foot span { color: #4a5568; margin-right: 16px; white-space: nowrap; }
+
+  /* ── Article additions ───────────────────────────────────── */
+  article h2 { margin-top: 40px; }
+  article h3 { color:#ff6ec7; font-size:16px; margin-top:30px; }
+  .meta { color:#6c7a90; font-size:13px; margin:-18px 0 30px; }
+  .lede { font-size:17px; color:#cfd8ea; border-left:3px solid #ff2d78;
+          padding-left:16px; margin:0 0 32px; }
+  pre { background:#12002a; border:1px solid #00f5ff22; border-radius:6px;
+        padding:14px 16px; overflow-x:auto; font-size:13px; line-height:1.5;
+        color:#b8e6ff; margin-bottom:20px; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+         background:#ffffff0d; padding:1px 5px; border-radius:4px; color:#8fe8ff; }
+  pre code { background:none; padding:0; color:inherit; }
+  table { width:100%; border-collapse:collapse; margin:0 0 24px; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #00f5ff1a; }
+  th { color:#00f5ff; font-weight:600; font-size:13px; letter-spacing:.4px; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .callout { background:#ff2d780f; border:1px solid #ff2d7833; border-radius:8px;
+             padding:14px 18px; margin:0 0 24px; }
+  .callout strong { color:#ff6ec7; }
+  ul, ol { margin:0 0 20px 22px; }
+  li { margin-bottom:8px; }
+  .artlist { list-style:none; margin-left:0; }
+  .artlist li { border-bottom:1px solid #00f5ff1a; padding:18px 0; margin:0; }
+  .artlist a { font-size:18px; font-weight:600; text-decoration:none; }
+  .artlist p { color:#9fb0c8; font-size:14px; margin:6px 0 0; }
+  .artlist .when { color:#6c7a90; font-size:12px; letter-spacing:.5px; }
+</style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<nav class="tabs">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks</a>
+  <a href="/leaderboard.html">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="/articles/" class="active">Articles</a>
+  <a href="/NeonDrift/" class="tab-play">▶ Play</a>
+</nav>
+
+<h1>Articles</h1>
+<p class="sub">Technical write-ups from building Neon Drift — a solo-developed arcade game
+that runs on HTML5 canvas, shipped on Google Play and the open web.</p>
+
+<p>These are longer pieces about specific problems I hit and how I measured my way out of
+them. Everything here comes with the actual numbers, including the times I got it wrong.
+If you build browser games, some of this may save you a week.</p>
+
+<p>Shorter, more frequent build notes live in the <a href="/devlog.html">devlog</a>.</p>
+
+<ul class="artlist">
+  <li>
+    <span class="when">AUGUST 2026 · PERFORMANCE</span><br>
+    <a href="/articles/canvas-shadowblur-performance.html">Canvas shadowBlur is charged per draw call — three bugs, one cause</a>
+    <p>Three unrelated performance reports from three players turned out to be the same
+    mistake. Why <code>shadowBlur</code> is billed per <code>fill()</code> rather than per
+    path, how to count blurred draw calls instead of timing them, and the numbers before
+    and after: 615 blurred fills a frame down to 2, 185 down to 0.</p>
+  </li>
+  <li>
+    <span class="when">AUGUST 2026 · GAME LOOP</span><br>
+    <a href="/articles/game-loop-refresh-rate.html">Your game loop probably runs at a different speed on a 144 Hz monitor</a>
+    <p>My game ran at 75% speed on 90 Hz displays and 80% on 144 Hz ones, and nobody
+    reported it — because a slower simulation doesn't feel broken, it feels easier. The
+    two mistakes that only cause damage together, and a fixed-timestep accumulator with
+    render interpolation that fixes both.</p>
+  </li>
+  <li>
+    <span class="when">AUGUST 2026 · DEBUGGING</span><br>
+    <a href="/articles/ios-touch-stutter-investigation.html">Four wrong answers: debugging a stutter that turned out not to be my bug</a>
+    <p>A player reported a stutter on every tap. I was confidently wrong four times. The
+    control experiment that would have ended it on day one, why a null result was the most
+    useful data I got, and the moment an offhand remark invalidated my best theory.</p>
+  </li>
+</ul>
+
+<h2>About these</h2>
+
+<p>Neon Drift is built by one person. There is no engine underneath it — it is a single
+HTML file, vanilla JavaScript, and a 2D canvas, with a small serverless backend for
+leaderboards and daily challenges. That constraint is why these problems are interesting:
+there is no framework absorbing the mistakes, so every one of them is visible and
+attributable.</p>
+
+<p>The through-line in all three pieces is the same. Every time I diagnosed a problem by
+reading code and reasoning about it, I was wrong. Every time I built a way to measure it,
+I got an answer — sometimes an answer I didn't want, like "this isn't your bug at all".</p>
+
+<nav class="foot">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/support.html">Support</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/delete-data.html">Delete My Data</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+</nav>
+</body>
+</html>

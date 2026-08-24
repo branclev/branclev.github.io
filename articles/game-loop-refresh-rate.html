@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your game loop probably runs at a different speed on a 144 Hz monitor | Neon Drift</title>
+<meta name="description" content="A fixed-timestep bug that made an HTML5 game run at 75% speed on 90 Hz displays and 80% on 144 Hz, with measurements, the accumulator fix, and render interpolation.">
+<link rel="canonical" href="https://neondriftgame.com/articles/game-loop-refresh-rate.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your game loop probably runs at a different speed on a 144 Hz monitor | Neon Drift">
+<meta property="og:description" content="A fixed-timestep bug that made an HTML5 game run at 75% speed on 90 Hz displays and 80% on 144 Hz, with measurements, the accumulator fix, and render interpolation.">
+<meta property="og:url" content="https://neondriftgame.com/articles/game-loop-refresh-rate.html">
+<style>
+  body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:720px; margin:0 auto; padding:40px 24px 80px; line-height:1.7; }
+  h1 { color:#ff2d78; text-shadow:0 0 12px #ff2d7888; font-size:28px; }
+  h2 { color:#00f5ff; font-size:19px; margin-top:36px; }
+  a { color:#00f5ff; }
+  .sub { color:#ffffff88; font-size:14px; margin-bottom:32px; }
+  p { margin-bottom:16px; }
+
+  /* ── Top tab bar ──────────────────────────────────────────
+     Sticky, horizontally scrollable on narrow screens, and present on EVERY
+     page including the legal ones — those are not tabs, but they must not be
+     dead ends either. Deliberately limited to the six pages a player would
+     actually want: About / Contact / Support / Privacy / Delete data stay in
+     the footer, which is where people look for them and where AdSense and
+     Play expect the privacy link to be. */
+  nav.tabs {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 6px; align-items: center;
+    /* 712px = the 760px content column minus its 24px side padding, so the bar
+       lines up with the text on EVERY page. index.html is the reason this is
+       needed: there the column is a .wrap div and <body> is full-width, so
+       without this the bar stretched edge to edge and sat left of everything. */
+    max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
+    box-sizing: border-box;
+    /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
+       a well-known way to get a vanishing or flickering header on mobile
+       Safari, and the blur bought nothing over a solid colour here. */
+    background: #0a0014;
+    border-bottom: 1px solid #00f5ff22;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Cannot collapse to nothing even if a child is mis-sized. */
+    min-height: 56px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a {
+    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
+    text-decoration: none; margin: 0; line-height: 1.4;
+  }
+  nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
+  nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  /* 🔴 NOT class="play". index.html already owns .play for the big
+     "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
+     inherited here it pushed the bar to 106px tall and knocked this button out
+     of line with the other tabs. Keep this name distinct. */
+  nav.tabs a.tab-play {
+    color: #0a0014; font-weight: 800; margin: 0;
+    background: linear-gradient(135deg,#ff2d78,#ff6ec7);
+    box-shadow: 0 0 14px #ff2d7844;
+  }
+  nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
+  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+
+  /* Footer holds the secondary and legal links. The six main pages live in the
+     tab bar at the top, so repeating them down here was noise — but Privacy and
+     Delete My Data must stay reachable from every page: Play requires the
+     privacy link and AdSense reads it. */
+  nav.foot {
+    margin-top: 48px; padding-top: 20px; border-top: 1px solid #00f5ff22;
+    font-size: 13px; line-height: 2.2; color: #6c7a90;
+  }
+  nav.foot a { color: #7f8fa6; margin-right: 16px; white-space: nowrap; }
+  nav.foot a:hover { color: #00f5ff; }
+  nav.foot span { color: #4a5568; margin-right: 16px; white-space: nowrap; }
+
+  /* ── Article additions ───────────────────────────────────── */
+  article h2 { margin-top: 40px; }
+  article h3 { color:#ff6ec7; font-size:16px; margin-top:30px; }
+  .meta { color:#6c7a90; font-size:13px; margin:-18px 0 30px; }
+  .lede { font-size:17px; color:#cfd8ea; border-left:3px solid #ff2d78;
+          padding-left:16px; margin:0 0 32px; }
+  pre { background:#12002a; border:1px solid #00f5ff22; border-radius:6px;
+        padding:14px 16px; overflow-x:auto; font-size:13px; line-height:1.5;
+        color:#b8e6ff; margin-bottom:20px; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+         background:#ffffff0d; padding:1px 5px; border-radius:4px; color:#8fe8ff; }
+  pre code { background:none; padding:0; color:inherit; }
+  table { width:100%; border-collapse:collapse; margin:0 0 24px; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #00f5ff1a; }
+  th { color:#00f5ff; font-weight:600; font-size:13px; letter-spacing:.4px; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .callout { background:#ff2d780f; border:1px solid #ff2d7833; border-radius:8px;
+             padding:14px 18px; margin:0 0 24px; }
+  .callout strong { color:#ff6ec7; }
+  ul, ol { margin:0 0 20px 22px; }
+  li { margin-bottom:8px; }
+  .artlist { list-style:none; margin-left:0; }
+  .artlist li { border-bottom:1px solid #00f5ff1a; padding:18px 0; margin:0; }
+  .artlist a { font-size:18px; font-weight:600; text-decoration:none; }
+  .artlist p { color:#9fb0c8; font-size:14px; margin:6px 0 0; }
+  .artlist .when { color:#6c7a90; font-size:12px; letter-spacing:.5px; }
+</style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<nav class="tabs">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks</a>
+  <a href="/leaderboard.html">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="/articles/" class="active">Articles</a>
+  <a href="/NeonDrift/" class="tab-play">▶ Play</a>
+</nav>
+
+<article>
+<h1>Your game loop probably runs at a different speed on a 144&nbsp;Hz monitor</h1>
+<p class="meta">By Brandon Levy · Neon Drift devlog · August 2026</p>
+
+<p class="lede">My game ran at 100% speed on a 60&nbsp;Hz display, 75% on a 90&nbsp;Hz one,
+and 80% on a 144&nbsp;Hz one. Nobody reported it, because a slower game doesn't feel
+broken — it feels easier.</p>
+
+<p>I found this while chasing something else entirely, which is the only reason I found it
+at all. It had been sitting in my notes for two weeks, mis-scoped as a battery-saver issue,
+while it was quietly making my leaderboards unfair.</p>
+
+<h2>The loop</h2>
+
+<p>Here is what I shipped. If you have written a browser game, you have probably written
+something close to it:</p>
+
+<pre><code>const TARGET_FPS = 60;
+const FRAME_MS   = 1000 / TARGET_FPS;   // 16.667
+const PHYSICS_MS = FRAME_MS - 1;        // 15.667, "slightly loose so 60Hz never misses"
+let lastPhysicsTime = 0;
+
+function loop() {
+  requestAnimationFrame(loop);
+  const now = Date.now();
+  const delta = now - lastPhysicsTime;
+
+  if (delta &gt;= PHYSICS_MS) {
+    lastPhysicsTime = now;     // &lt;- the bug
+    update();
+  }
+  draw();
+}</code></pre>
+
+<p>The intent is "run the simulation about sixty times a second". The reasoning is that if
+enough time has passed, take a step. It is short, it is readable, and on the machine I
+wrote it on it is perfectly correct.</p>
+
+<h2>Two mistakes that only interact</h2>
+
+<p>The first mistake is <code>lastPhysicsTime = now</code>. That line <em>discards</em>
+whatever time was left over. If 20&nbsp;ms have elapsed and a step is 16.667&nbsp;ms, you
+take one step and throw away 3.3&nbsp;ms. Do that repeatedly and the simulation drifts
+behind wall-clock time, permanently. A correct loop subtracts the step from an accumulator
+and carries the remainder.</p>
+
+<p>The second mistake is <code>Date.now()</code>. It returns <strong>integer</strong>
+milliseconds. It is also wall-clock time, which means it can jump backwards when the system
+clock is adjusted. <code>performance.now()</code> is monotonic and sub-millisecond, and it
+is what this code wanted.</p>
+
+<p>Either mistake alone is survivable. Together they produce something worse than either:
+the number of steps per second depends on how the display's frame interval divides into a
+threshold that has been quantised to whole milliseconds.</p>
+
+<h2>The measurement</h2>
+
+<p>You can work this out without a browser. Simulate integer <code>Date.now()</code>
+against the frame interval of each refresh rate and count how many times the branch fires:</p>
+
+<pre><code>const PHYSICS_MS = 15.667;
+function simulate(hz, seconds) {
+  const frame = 1000 / hz;
+  let last = 0, ticks = 0;
+  for (let f = 1; f &lt;= seconds * hz; f++) {
+    const now = Math.floor(f * frame);   // Date.now() is integer ms
+    if (now - last &gt;= PHYSICS_MS) { last = now; ticks++; }
+  }
+  return ticks / seconds;
+}</code></pre>
+
+<p>The target is 60. What it actually does:</p>
+
+<table>
+<tr><th>Display</th><th class="num">Simulation ticks/sec</th><th class="num">Effective game speed</th></tr>
+<tr><td>60 Hz</td><td class="num">60.0</td><td class="num">100% — correct by luck</td></tr>
+<tr><td>90 Hz</td><td class="num">45.0</td><td class="num">75%</td></tr>
+<tr><td>120 Hz</td><td class="num">60.0</td><td class="num">100%</td></tr>
+<tr><td>144 Hz</td><td class="num">48.0</td><td class="num">80%</td></tr>
+<tr><td>165 Hz</td><td class="num">54.6</td><td class="num">91%</td></tr>
+</table>
+
+<p>60 and 120 are fine. Everything else is not. And notice there is no pattern a player
+could learn — 165&nbsp;Hz is <em>better</em> than 144&nbsp;Hz.</p>
+
+<h2>Why nobody reports this</h2>
+
+<p>This is the part I think is genuinely worth internalising, because it is why the bug
+survived a sixteen-day closed test with real players.</p>
+
+<p>In my game, both the obstacle speed and gravity are applied <strong>per simulation
+step</strong>. So when the simulation runs slower, everything scales together: obstacles
+approach more slowly, the player falls more slowly, the gaps stay exactly where they were.
+The geometry is untouched.</p>
+
+<p>What is <em>not</em> untouched is the player. Reaction time is measured in real seconds.
+A player at 45 ticks per second gets a third more wall-clock time to react to every gap,
+against identical geometry.</p>
+
+<p><strong>So the bug does not make the game feel bad. It makes it easier.</strong> Nobody
+files a report saying "I think I'm doing suspiciously well." I only found it because I was
+measuring frame timing for an unrelated stutter and a diagnostic number came back at 54.6
+when it should have been 60.</p>
+
+<div class="callout">
+<strong>The competitive consequence.</strong> My game has a daily challenge where every
+player gets the same seeded course, plus head-to-head modes. A player on a 90&nbsp;Hz phone
+was playing a materially easier version of the identical challenge. Not by cheating — by
+owning a different screen.
+</div>
+
+<h2>The fix, part one: a real accumulator</h2>
+
+<pre><code>const STEP_MS      = 1000 / 60;   // exact, no fudge factor
+const MAX_CATCHUP  = 5;           // ~83ms of backlog per frame
+const MAX_FRAME_MS = 250;
+let acc = 0, lastFrame = 0, renderAlpha = 0;
+
+function loop() {
+  requestAnimationFrame(loop);
+  const now = performance.now();
+  if (!lastFrame) { lastFrame = now; draw(0); return; }
+
+  let elapsed = now - lastFrame;
+  lastFrame = now;
+  if (elapsed &gt; MAX_FRAME_MS) elapsed = MAX_FRAME_MS;
+  acc += elapsed;
+
+  let steps = 0;
+  while (acc &gt;= STEP_MS &amp;&amp; steps &lt; MAX_CATCHUP) {
+    acc -= STEP_MS;               // carry the remainder
+    steps++;
+    update();
+  }
+  if (steps &gt;= MAX_CATCHUP) acc = 0;
+  renderAlpha = acc / STEP_MS;
+  draw(renderAlpha);
+}</code></pre>
+
+<p>Three details that are not decoration:</p>
+
+<p><strong><code>MAX_FRAME_MS</code>.</strong> A backgrounded tab stops firing
+<code>requestAnimationFrame</code>. Come back after forty seconds and, without a clamp, you
+bank forty seconds of debt and run thousands of steps in one frame. The player returns to a
+corpse. Clamp the elapsed time before it reaches the accumulator.</p>
+
+<p><strong>Dropping the backlog at the cap, not carrying it.</strong> When a device cannot
+keep up, carrying the deficit means the next frame has even more work, which makes it later
+still. That is the classic spiral of death. Setting <code>acc = 0</code> at the cap means
+a struggling device runs in slow motion instead of locking up — which is the failure you
+want.</p>
+
+<p><strong>An exact step.</strong> The old <code>FRAME_MS - 1</code> fudge was there to stop
+a 60&nbsp;Hz display missing a step. With a real accumulator it is unnecessary, and it was
+half of what made the arithmetic go wrong.</p>
+
+<p>Verified across 60, 90, 120, 144, 165 and 240&nbsp;Hz, with frame jitter, and throttled
+to 30 and 20&nbsp;Hz: a true 59.9–60.0 ticks per second everywhere.</p>
+
+<h2>The fix, part two: interpolation</h2>
+
+<p>A fixed 60&nbsp;Hz simulation on a 165&nbsp;Hz display leaves roughly three frames to
+fill between each simulated position. Without interpolation the panel shows the same
+position three times and then jumps — the object moves in visible stairs whenever it moves
+fast.</p>
+
+<p>The answer is not to speed up the simulation. It is to keep the simulation fixed and
+draw <em>between</em> steps. Store each object's previous position, then render a fraction
+of the way toward the current one:</p>
+
+<pre><code>// at the top of each simulation step, before anything moves
+player.prevY = player.y;
+
+// at render time
+const SNAP = 40;   // px
+function withInterpolation(alpha, drawFn) {
+  const trueY = player.y;
+  if (Math.abs(player.y - player.prevY) &lt; SNAP)
+    player.y = player.prevY + (player.y - player.prevY) * alpha;
+  try { drawFn(); } finally { player.y = trueY; }
+}</code></pre>
+
+<p>The important property: <strong>nothing here feeds back into the simulation.</strong>
+Collision, scoring and the random seed all still run on the integer step. Interpolation
+cannot change an outcome, which is what makes it safe in a game with leaderboards.</p>
+
+<p>Three things I got wrong before getting it right:</p>
+
+<ul>
+  <li><strong>Use <code>try</code>/<code>finally</code>.</strong> My draw function has early
+      returns. Leaking an interpolated coordinate back into the next simulation step
+      desynchronises the game from itself, and the symptom appears far from the cause.</li>
+  <li><strong>Restoration must be exact.</strong> I tested 5,000 interpolate/restore round
+      trips for float drift. A restore that loses a fraction of a pixel each frame is a slow
+      corruption of world state that no test will catch later.</li>
+  <li><strong>Snap, don't slide.</strong> A respawn or a recycled object moves a long way in
+      one step. Interpolating across that draws it gliding through walls. Anything past a
+      threshold gets drawn where it actually is.</li>
+</ul>
+
+<h2>How to check yours in two minutes</h2>
+
+<p>Add a counter to your loop, play for thirty seconds, and print the number of simulation
+steps divided by elapsed seconds. If your target is 60 and you see 45, 48 or 54, you have
+this bug. Then borrow someone's laptop with a different screen and do it again — that
+comparison is the whole test.</p>
+
+<p>The tell in the source is any loop that assigns <em>now</em> to the last-step timestamp
+instead of subtracting a fixed step from an accumulator. If you also see
+<code>Date.now()</code>, you have both halves.</p>
+
+<h2>The part I got wrong</h2>
+
+<p>This was in my notes for two weeks as "throttled devices run slow, confirmed on iOS Low
+Power Mode". That framing is what kept it un-fixed: it made it sound like an edge case
+affecting a handful of players who had opted into a degraded mode.</p>
+
+<p>It was not an edge case. It was every player on a high-refresh display, permanently,
+including a large share of modern phones. I had the correct observation and drew the
+boundary around it far too tightly — and because the symptom was "easier", nothing pushed
+back on that.</p>
+
+<p>If you have a note like that, the question worth asking is not "how do I fix this" but
+"what else produces this symptom that I have not checked".</p>
+
+<p><em>Neon Drift is free to play in a browser and on <a href="https://play.google.com/store/apps/details?id=io.github.branclev.twa" rel="noopener">Google Play</a>.
+More build notes in the <a href="/devlog.html">devlog</a>.</em></p>
+</article>
+
+<nav class="foot">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/support.html">Support</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/delete-data.html">Delete My Data</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+</nav>
+</body>
+</html>

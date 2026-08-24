@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canvas shadowBlur is charged per draw call — three bugs, one cause | Neon Drift</title>
+<meta name="description" content="shadowBlur is billed per fill() and stroke() call, not per path. How three unrelated performance reports in one HTML5 game turned out to be the same bug, with real before-and-after numbers.">
+<link rel="canonical" href="https://neondriftgame.com/articles/canvas-shadowblur-performance.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Canvas shadowBlur is charged per draw call — three bugs, one cause | Neon Drift">
+<meta property="og:description" content="shadowBlur is billed per fill() and stroke() call, not per path. How three unrelated performance reports in one HTML5 game turned out to be the same bug, with real before-and-after numbers.">
+<meta property="og:url" content="https://neondriftgame.com/articles/canvas-shadowblur-performance.html">
+<style>
+  body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:720px; margin:0 auto; padding:40px 24px 80px; line-height:1.7; }
+  h1 { color:#ff2d78; text-shadow:0 0 12px #ff2d7888; font-size:28px; }
+  h2 { color:#00f5ff; font-size:19px; margin-top:36px; }
+  a { color:#00f5ff; }
+  .sub { color:#ffffff88; font-size:14px; margin-bottom:32px; }
+  p { margin-bottom:16px; }
+
+  /* ── Top tab bar ──────────────────────────────────────────
+     Sticky, horizontally scrollable on narrow screens, and present on EVERY
+     page including the legal ones — those are not tabs, but they must not be
+     dead ends either. Deliberately limited to the six pages a player would
+     actually want: About / Contact / Support / Privacy / Delete data stay in
+     the footer, which is where people look for them and where AdSense and
+     Play expect the privacy link to be. */
+  nav.tabs {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 6px; align-items: center;
+    /* 712px = the 760px content column minus its 24px side padding, so the bar
+       lines up with the text on EVERY page. index.html is the reason this is
+       needed: there the column is a .wrap div and <body> is full-width, so
+       without this the bar stretched edge to edge and sat left of everything. */
+    max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
+    box-sizing: border-box;
+    /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
+       a well-known way to get a vanishing or flickering header on mobile
+       Safari, and the blur bought nothing over a solid colour here. */
+    background: #0a0014;
+    border-bottom: 1px solid #00f5ff22;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Cannot collapse to nothing even if a child is mis-sized. */
+    min-height: 56px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a {
+    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
+    text-decoration: none; margin: 0; line-height: 1.4;
+  }
+  nav.tabs a:hover { color: #00f5ff; border-color: #00f5ff33; background: rgba(0,245,255,0.06); text-decoration: none; }
+  nav.tabs a.active { color: #00f5ff; border-color: #00f5ff66; background: rgba(0,245,255,0.09); }
+  /* 🔴 NOT class="play". index.html already owns .play for the big
+     "PLAY FREE IN YOUR BROWSER" button, which carries margin: 6px 0 40px —
+     inherited here it pushed the bar to 106px tall and knocked this button out
+     of line with the other tabs. Keep this name distinct. */
+  nav.tabs a.tab-play {
+    color: #0a0014; font-weight: 800; margin: 0;
+    background: linear-gradient(135deg,#ff2d78,#ff6ec7);
+    box-shadow: 0 0 14px #ff2d7844;
+  }
+  nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
+  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+
+  /* Footer holds the secondary and legal links. The six main pages live in the
+     tab bar at the top, so repeating them down here was noise — but Privacy and
+     Delete My Data must stay reachable from every page: Play requires the
+     privacy link and AdSense reads it. */
+  nav.foot {
+    margin-top: 48px; padding-top: 20px; border-top: 1px solid #00f5ff22;
+    font-size: 13px; line-height: 2.2; color: #6c7a90;
+  }
+  nav.foot a { color: #7f8fa6; margin-right: 16px; white-space: nowrap; }
+  nav.foot a:hover { color: #00f5ff; }
+  nav.foot span { color: #4a5568; margin-right: 16px; white-space: nowrap; }
+
+  /* ── Article additions ───────────────────────────────────── */
+  article h2 { margin-top: 40px; }
+  article h3 { color:#ff6ec7; font-size:16px; margin-top:30px; }
+  .meta { color:#6c7a90; font-size:13px; margin:-18px 0 30px; }
+  .lede { font-size:17px; color:#cfd8ea; border-left:3px solid #ff2d78;
+          padding-left:16px; margin:0 0 32px; }
+  pre { background:#12002a; border:1px solid #00f5ff22; border-radius:6px;
+        padding:14px 16px; overflow-x:auto; font-size:13px; line-height:1.5;
+        color:#b8e6ff; margin-bottom:20px; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+         background:#ffffff0d; padding:1px 5px; border-radius:4px; color:#8fe8ff; }
+  pre code { background:none; padding:0; color:inherit; }
+  table { width:100%; border-collapse:collapse; margin:0 0 24px; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #00f5ff1a; }
+  th { color:#00f5ff; font-weight:600; font-size:13px; letter-spacing:.4px; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .callout { background:#ff2d780f; border:1px solid #ff2d7833; border-radius:8px;
+             padding:14px 18px; margin:0 0 24px; }
+  .callout strong { color:#ff6ec7; }
+  ul, ol { margin:0 0 20px 22px; }
+  li { margin-bottom:8px; }
+  .artlist { list-style:none; margin-left:0; }
+  .artlist li { border-bottom:1px solid #00f5ff1a; padding:18px 0; margin:0; }
+  .artlist a { font-size:18px; font-weight:600; text-decoration:none; }
+  .artlist p { color:#9fb0c8; font-size:14px; margin:6px 0 0; }
+  .artlist .when { color:#6c7a90; font-size:12px; letter-spacing:.5px; }
+</style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6837227567654428"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<nav class="tabs">
+  <a href="/">Home</a>
+  <a href="/how-to-play.html">How to Play</a>
+  <a href="/game-modes.html">Game Modes</a>
+  <a href="/unlocks-and-skins.html">Unlocks</a>
+  <a href="/leaderboard.html">Leaderboards</a>
+  <a href="/devlog.html">Devlog</a>
+  <a href="/articles/" class="active">Articles</a>
+  <a href="/NeonDrift/" class="tab-play">▶ Play</a>
+</nav>
+
+<article>
+<h1>Your canvas game is slow because of one line, and it isn't the one you think</h1>
+<p class="meta">By Brandon Levy · Neon Drift devlog · August 2026</p>
+
+<p class="lede">Three separate players reported three separate performance problems in my game.
+All three turned out to be the same bug. The fix took minutes each time; finding it took
+weeks, because I kept measuring the wrong thing.</p>
+
+<p>I build <a href="/NeonDrift/">Neon Drift</a>, an arcade game that runs entirely in a
+2D canvas. Over a few months I got three unrelated-sounding reports:</p>
+
+<ul>
+  <li>"Stuttering gets worse the longer I use the VAPORGRID pipe design."</li>
+  <li>"The cherry blossom tunnel is the worst one for lag."</li>
+  <li>"There's a slight stutter when I tap, and it's worse if I tap fast."</li>
+</ul>
+
+<p>Different players, different features, different symptoms. One cause:
+<strong><code>ctx.shadowBlur</code> is charged per drawing call, not per path.</strong></p>
+
+<h2>What that actually means</h2>
+
+<p>Canvas 2D gives you a glow with three properties: <code>shadowColor</code>,
+<code>shadowBlur</code>, and whatever you draw next. It reads like a style, the same as
+<code>fillStyle</code>. Setting a fill colour costs nothing, so it is natural to assume
+setting a blur costs nothing either.</p>
+
+<p>It doesn't. On a GPU-backed canvas, every <code>fill()</code> or <code>stroke()</code>
+issued while <code>shadowBlur</code> is non-zero triggers a separate blur pass. The cost
+attaches to the <em>call</em>. Ten calls with a blur set cost ten blur passes, even if
+they draw ten tiny identical dots in the same place.</p>
+
+<p>Which means this innocent-looking loop is expensive in a way that scales with your
+content:</p>
+
+<pre><code>for (const p of particles) {
+  ctx.save();
+  ctx.globalAlpha = p.life;
+  ctx.shadowColor = p.color;
+  ctx.shadowBlur  = 8;
+  ctx.fillStyle   = p.color;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+  ctx.fill();          // &lt;- one blur pass, every particle, every frame
+  ctx.restore();
+}</code></pre>
+
+<p>That is real code from my game. It looks like a normal particle renderer. It was the
+cause of the third bug on that list.</p>
+
+<h2>Count calls, don't time them</h2>
+
+<p>The reason this took me so long is that I reached for a profiler first, on a desktop
+machine, and the profiler told me everything was fine. It was fine — <em>on desktop</em>.
+A desktop CPU rasteriser prices a blur completely differently from a mobile GPU
+compositor, so a design that costs 0.3&nbsp;ms on a laptop can cost tens of milliseconds
+on a phone.</p>
+
+<p>What finally worked was giving up on milliseconds and counting calls instead. I wrote a
+fake canvas context that renders nothing and only tallies what it is asked to do:</p>
+
+<pre><code>function makeCountingCtx(counter) {
+  const ctx = {
+    _blur: 0, _stack: [],
+    save()    { this._stack.push(this._blur); },
+    restore() { this._blur = this._stack.pop() ?? 0; },
+    beginPath(){}, moveTo(){}, lineTo(){}, arc(){ counter.arc++; },
+    fill()   { counter.fill++;   if (this._blur > 0) counter.blurred++; },
+    stroke() { counter.stroke++; if (this._blur > 0) counter.blurred++; },
+    // ...the rest of the 2D API, all no-ops
+  };
+  Object.defineProperty(ctx, 'shadowBlur', {
+    get() { return this._blur; },
+    set(v) { this._blur = v; },
+  });
+  return ctx;
+}</code></pre>
+
+<p>Then run each piece of drawing code against it for sixty frames and divide. It takes
+about an hour to write, runs in Node with no browser, and produces a number that means the
+same thing on every device. A count is not an estimate of cost — it <em>is</em> the cost,
+in the only unit that transfers between machines.</p>
+
+<p>The <code>save</code>/<code>restore</code> stack matters, by the way. A blur set inside
+a <code>save()</code> block is popped on <code>restore()</code>, and if your counter
+doesn't model that you will attribute blur to the wrong draw calls entirely.</p>
+
+<h2>The three bugs, in numbers</h2>
+
+<h3>1. VAPORGRID: 80 blurred strokes per frame</h3>
+
+<p>A pipe design drew a perspective grid — a horizon and a fan of vertical lines — as
+eighty individual strokes with a glow on each:</p>
+
+<pre><code>// before
+for (const line of lines) {
+  ctx.beginPath();
+  ctx.moveTo(line.x0, line.y0);
+  ctx.lineTo(line.x1, line.y1);
+  ctx.stroke();        // 80 of these, each a blur pass
+}</code></pre>
+
+<p>Every one of those lines is the same colour and the same width. Canvas lets you build
+one path out of many disconnected segments and stroke it once:</p>
+
+<pre><code>// after
+ctx.beginPath();
+for (const line of lines) {
+  ctx.moveTo(line.x0, line.y0);
+  ctx.lineTo(line.x1, line.y1);
+}
+ctx.stroke();          // one blur pass, identical output</code></pre>
+
+<p>Eighty blur passes became one. The pixels are indistinguishable.</p>
+
+<p>The player's description was "stuttering that increases the longer I use it", which sent
+me looking for a leak — something growing frame over frame. Nothing was growing. Eighty
+blurred strokes per frame is simply more than that phone could sustain, and what actually
+increased over time was <em>thermal throttling</em>. The bug was constant; the phone got
+slower. Worth remembering when a report contains the word "increasing".</p>
+
+<h3>2. The cherry blossom tunnel: 615 blurred fills per frame</h3>
+
+<p>A decorative tunnel drew a sakura tree using a recursive branch function, and each
+branch tip drew blossoms, and each blossom drew five petals — as five separate blurred
+fills:</p>
+
+<pre><code>// before: five petals, five blur passes, ~120 flowers on screen
+ctx.shadowColor = '#ff6fae';
+ctx.shadowBlur  = 6;
+for (let k = 0; k &lt; 5; k++) {
+  ctx.save();
+  ctx.rotate(k * Math.PI * 2 / 5);
+  ctx.beginPath();
+  ctx.ellipse(0, -r * 0.6, r * 0.33, r * 0.58, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}</code></pre>
+
+<p>Measured: <strong>615 blurred fills and 1,036 arcs per frame</strong>, against 4 for the
+next heaviest tunnel in the game. It was using well over half the frame budget on its own.</p>
+
+<p>Batching the five petals into one path would have been a 5x win. Instead I baked each
+flower into an offscreen canvas once and stamped it with <code>drawImage</code>:</p>
+
+<pre><code>const cache = new Map();
+function flowerSprite(radius, pale) {
+  const key = radius + (pale ? 'p' : 'd');
+  let cv = cache.get(key);
+  if (cv) return cv;
+  cv = document.createElement('canvas');
+  cv.width = cv.height = Math.ceil((radius * 1.18 + 10) * 2);
+  const g = cv.getContext('2d');
+  g.translate(cv.width / 2, cv.height / 2);
+  g.shadowColor = '#ff6fae';
+  g.shadowBlur  = 6;              // paid ONCE, at bake time
+  g.beginPath();
+  for (let k = 0; k &lt; 5; k++) {
+    const a = k * Math.PI * 2 / 5;
+    g.ellipse(Math.sin(a) * radius * 0.6, -Math.cos(a) * radius * 0.6,
+              radius * 0.33, radius * 0.58, a, 0, Math.PI * 2);
+  }
+  g.fill();
+  cache.set(key, cv);
+  return cv;
+}</code></pre>
+
+<p><code>drawImage</code> of an already-blurred bitmap does no shadow work at all. The
+blur happens once, when the sprite is created, and every subsequent frame pays an ordinary
+composite. <strong>615 blurred fills became 2.</strong></p>
+
+<p>One detail that is easy to get wrong: <strong>bucket sprites by rounded size rather than
+scaling one master.</strong> My source blur was a fixed 6 pixels at every flower size. If
+you bake one large sprite and scale it down, the halo scales too, and small blossoms stop
+reading as blossoms. Caching a handful of size buckets costs a few kilobytes and keeps the
+art correct.</p>
+
+<h3>3. Flap particles: up to 185 blurred fills per frame</h3>
+
+<p>This is the loop from the top of the article. Every tap spawned between 5 and 37
+particles depending on the equipped skin, each living about 0.6 seconds, each rendered as
+its own blurred fill.</p>
+
+<table>
+<tr><th>Skin</th><th class="num">Particles per tap</th><th class="num">Alive while tapping fast</th></tr>
+<tr><td>Default</td><td class="num">5</td><td class="num">~25</td></tr>
+<tr><td>Inferno / Glitch / Mech</td><td class="num">15</td><td class="num">~75</td></tr>
+<tr><td>Freedom Flyer</td><td class="num">37</td><td class="num">~185</td></tr>
+</table>
+
+<p>Because particles are spawned <em>by input</em>, the frame cost scaled directly with how
+fast the player tapped. That is exactly the shape of "it's worse if I tap fast", and it is
+why the bug felt like an input problem rather than a rendering one.</p>
+
+<p>Same fix as the blossoms: pre-render a glow sprite per colour and size bucket, then
+<code>drawImage</code>. Blurred draw calls per frame went from one-per-particle to zero.</p>
+
+<p>I also found the particle array had <strong>no upper bound at all</strong> — the ceiling
+was however fast a human could tap. If you have a particle system, go and check right now
+whether yours has a cap. Mine was five years of good luck away from a problem.</p>
+
+<h2>The multiplier nobody checks</h2>
+
+<p>Once I had a counting harness, I profiled every design in the game and they all looked
+acceptable. Then I noticed the harness was measuring one pipe, and the game draws three at
+a time.</p>
+
+<p>One design, TOXIC, drew acid drips with a glow — one fill per drip, one per droplet
+bead, one per bubble. Eighteen blurred fills per side, thirty-six per pipe pair. With three
+pipe pairs on screen at the highest difficulty:</p>
+
+<table>
+<tr><th>Measurement</th><th class="num">Blurred calls</th></tr>
+<tr><td>TOXIC, per pipe pair (passes its budget)</td><td class="num">36</td></tr>
+<tr><td>TOXIC &times; 3 pairs on screen</td><td class="num">108</td></tr>
+<tr><td>VAPORGRID, when a player complained</td><td class="num">80</td></tr>
+</table>
+
+<p>It passed every per-design check and was still the most expensive thing in the game. If
+you build a budget check, <strong>check the worst-case frame, not just the worst-case
+component.</strong> The multiplier is where the damage is.</p>
+
+<p>Batching the drips and bubbles into two paths took it from 36 to 4.</p>
+
+<h2>The trap when you batch arcs</h2>
+
+<p>When you merge many shapes into one path, circles need care. This is wrong:</p>
+
+<pre><code>ctx.beginPath();
+for (const b of bubbles) ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+ctx.fill();</code></pre>
+
+<p><code>arc()</code> continues the current path, so each circle is joined to the previous
+one by a straight line. In my case the acid drips grew visible tails. Move first:</p>
+
+<pre><code>ctx.beginPath();
+for (const b of bubbles) {
+  ctx.moveTo(b.x + b.r, b.y);      // lift the pen to the arc's start
+  ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+}
+ctx.fill();</code></pre>
+
+<p>Also worth knowing: overlapping subpaths at partial alpha behave differently batched
+than separately. Two overlapping semi-transparent circles drawn as two fills double up
+where they cross; drawn as one path they don't. Usually that looks better, but it is a
+change, so look at it.</p>
+
+<h2>What to do with this</h2>
+
+<p>If you have a canvas game that feels rough on phones and fine on your development
+machine, the fastest useful thing you can do is stop timing and start counting:</p>
+
+<ol>
+  <li><strong>Count blurred draw calls per frame.</strong> A stub context takes an hour to
+      write and gives you a device-independent number.</li>
+  <li><strong>Find loops that set <code>shadowBlur</code> and then fill once per item.</strong>
+      That is the shape of the bug, every time.</li>
+  <li><strong>Batch same-styled shapes into one path and one fill.</strong> Free, and
+      pixel-identical.</li>
+  <li><strong>Bake anything repeated into an offscreen sprite</strong> and
+      <code>drawImage</code> it. The blur becomes a one-time cost.</li>
+  <li><strong>Check the worst-case frame</strong>, with every element on screen at once and
+      multiplied by how many of each are drawn.</li>
+  <li><strong>Cap anything unbounded</strong> — particles especially.</li>
+</ol>
+
+<p>I now run a budget script that profiles every design and fails if any of them, or the
+combined worst-case frame, goes over. It found the TOXIC problem the first time I ran it,
+after I thought I was finished.</p>
+
+<p>The broader lesson I keep relearning: I diagnosed all three of these wrongly at first,
+and every wrong diagnosis came from reasoning about the code instead of measuring it. The
+code looks fine. It looks like a normal particle loop. The number is what tells you.</p>
+
+<p><em>Neon Drift is free to play in a browser and on <a href="https://play.google.com/store/apps/details?id=io.github.branclev.twa" rel="noopener">Google Play</a>.
+More on how it's built in the <a href="/devlog.html">devlog</a>.</em></p>
+</article>
+
+<nav class="foot">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/support.html">Support</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/delete-data.html">Delete My Data</a>
+  <a href="https://www.youtube.com/@NeonDriftGame" rel="noopener">YouTube</a>
+</nav>
+</body>
+</html>
