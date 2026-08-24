@@ -102,6 +102,34 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">AUGUST 24, 2026</div>
+  <h2>Challenge a friend to the exact course you just flew</h2>
+  <p>After any Classic run there is now a <strong>CHALLENGE A FRIEND</strong> button. It sends a link to the <strong>exact course you just played</strong> &mdash; the same pipes, the same tunnels, in the same order &mdash; with your score attached.</p>
+  <p>Whoever taps it flies that identical course. At the end the game puts the two scores side by side, and if they beat you they can send it straight back. On Android the link opens the app directly if you have it installed.</p>
+  <p>The <strong>Daily Challenge is deliberately excluded</strong>. Letting anyone practise the ranked course before their one attempt would quietly ruin the daily board, which is the one place everybody is guaranteed to be playing the same thing.</p>
+  <p>Making this work needed a change under the hood: every run now has a seed. Previously a Classic course was generated from ordinary randomness, which meant it could never be played again by anyone &mdash; including you. Courses are exactly as unpredictable as before; they are simply reproducible now.</p>
+</div>
+
+<div class="entry">
+  <div class="date">AUGUST 24, 2026</div>
+  <h2>The game was running at the wrong speed on high-refresh screens</h2>
+  <p>This one is worth explaining, because it had been quietly affecting competitive play and nobody reported it.</p>
+  <p>The game aims to simulate 60 steps a second regardless of your screen. It was not doing that. On a 90&nbsp;Hz phone it ran at about <strong>75% speed</strong>, and on a 144&nbsp;Hz screen about <strong>80%</strong>. Only 60&nbsp;Hz and 120&nbsp;Hz displays were correct, and by luck rather than design.</p>
+  <p>The reason nobody said anything is that a slower simulation does not feel broken &mdash; <strong>it feels easier</strong>. Pipe speed and gravity are both applied per step, so the course geometry is identical; what changes is that you get more real seconds to react to every gap. Nobody files a bug report saying they think they are doing suspiciously well.</p>
+  <p>That made it a fairness problem rather than a performance one. The Daily Challenge, Versus and Last Pilot Standing all assume everyone is playing the same game. Fixed: every device now runs at a true 60 steps a second, verified from 20&nbsp;Hz up to 240&nbsp;Hz.</p>
+  <p>Motion on 120 and 165&nbsp;Hz screens is smoother too. The game used to show the same position two or three frames in a row; it now draws the in-between positions.</p>
+</div>
+
+<div class="entry">
+  <div class="date">AUGUST 24, 2026</div>
+  <h2>Three performance fixes, and one that turned out not to be ours</h2>
+  <p>The <strong>SAKURA DRIFT</strong> tunnel was by a wide margin the most expensive thing in the game &mdash; it was drawing every cherry blossom petal as a separate glowing shape, about 615 of them per frame, against 4 for the next heaviest tunnel. The <strong>flap particles</strong> had the same problem and got worse the faster you tapped, with no upper limit at all. The <strong>TOXIC</strong> pipe design was third.</p>
+  <p>All three now cost a small fraction of what they did, and none of them look any different. There is now an automated check that refuses to let a new design ship if it goes over budget &mdash; it caught TOXIC the first time it ran, after we thought we were finished.</p>
+  <p>A player also reported a small stutter every time they tapped, on a recent iPhone. We chased that one properly, with measurements on the device, and the answer was that <strong>iOS drops a frame on every touch</strong> &mdash; a test page containing nothing but a canvas and one listener does exactly the same. Nothing in the game causes it and nothing in the game can fix it. Writing that down so it does not get re-investigated.</p>
+  <p>There is a longer, more technical account of all of this in the new <a href="/articles/">articles section</a>.</p>
+</div>
+
+<div class="entry">
   <div class="date">AUGUST 14, 2026</div>
   <h2>Interruptions no longer cost you the run</h2>
   <p>Take a call mid-flight and the game now <strong>pauses itself</strong>. You come back to a TAP TO RESUME screen with your run held on exactly the frame you left it, rather than being dropped back into live play somewhere near a pipe you can no longer avoid.</p>
