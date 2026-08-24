@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Drift — About</title>
+<title>About Neon Drift — the story, and the no-mandatory-ads rule</title>
+<meta name="description" content="Why Neon Drift exists: a solo developer building an arcade game to play with his nephews, and the two rules it was built around — ads are never mandatory, and competition should reach everyone.">
 <link rel="canonical" href="https://neondriftgame.com/about.html">
 <style>
   body { background:#0a0014; color:#e8e8ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -89,17 +90,111 @@
   <a href="/NeonDrift/" class="tab-play">▶ Play</a>
 </nav>
 <h1>About Neon Drift</h1>
-<p class="sub">The story behind the game.</p>
+<p class="sub">Why a one-person arcade game exists, and the two rules it was built around.</p>
 
-<p>Hi, my name is Brandon. I've always wanted to make games, and I finally decided to go for it when my nephews started showing a lot of interest in games. A lot of what they played seemed overly complicated, so I wanted to build something simple and competitive — inspired by a simple, competitive game I used to play when I was their age.</p>
+<p>Hi — I'm Brandon. Neon Drift started because I wanted something fun to play on my phone
+<em>with my nephews</em>.</p>
 
-<p>Neon Drift is the result: a fast, reflex-driven neon arcade flyer that anyone can pick up in seconds, with leaderboards and challenges to keep it interesting. I hope you enjoy playing it as much as my nephews and I have.</p>
+<p>I'd always wanted to make a game. I never had a good enough reason to actually sit down
+and do it. Watching my nephews play gave me one.</p>
+
+<h2>The problem I was actually trying to solve</h2>
+
+<p>Most of what they were playing was new, and most of it was fine. But it didn't feel like
+the games I loved at their age. The older ones were simpler and meaner in a good way: you
+understood the whole game in about four seconds, and then it was just you against the thing,
+over and over, getting slightly better each run.</p>
+
+<p>So I built the game I wanted us to play together — heavily inspired by one that was
+everywhere when I was younger, the kind where a single mistake ends the run and you
+immediately press start again.</p>
+
+<p>Then I kept going. Every time something annoyed me, I changed it. Every time I thought
+"it would be better if…", I built that. What began as something to pass around at a family
+gathering turned into a real game, and honestly a much better one than I set out to make.</p>
+
+<h2>Rule one: you will never be forced to watch an ad</h2>
+
+<p>This one is not negotiable, and it is the thing I'm most stubborn about.</p>
+
+<p>Mobile games today are <em>infested</em> with advertising. You lose, and before you can
+try again there's thirty seconds of something you didn't ask for. It yanks you out of the
+game completely, and the only escape is paying to make it stop. I think that's a genuinely
+bad way to treat someone who just wanted to play your game.</p>
+
+<p>Neon Drift will have ads eventually — I'd like this to pay for itself. But they will
+always follow two rules:</p>
+
+<ul>
+  <li><strong>Never mandatory.</strong> You will never be made to watch an ad to keep
+      playing, to continue, or to get back to the menu. Ignoring ads entirely will always
+      be a complete way to play this game.</li>
+  <li><strong>Always rewarded.</strong> If you choose to watch one, you get something
+      concrete for it — an extra attempt, a bonus, something you wanted. It's a trade you
+      opt into, not a toll.</li>
+</ul>
+
+<p>The first one planned is an optional second attempt at the Daily Challenge. You'll never
+have to take it.</p>
+
+<h2>Rule two: make it as competitive as possible, for everyone</h2>
+
+<p>The game that inspired this one was fiercely competitive — but only if someone happened
+to be sitting next to you. The score meant nothing unless you could shove your phone in
+somebody's face. That was the best part of it, and it was also the part that
+evaporated the moment you were alone.</p>
+
+<p>So the second pillar was building the most competitive version of this idea I could
+think of, and making it trivially easy to show someone what you did, wherever they are:</p>
+
+<ul>
+  <li><strong>Global leaderboards</strong>, all-time and weekly, plus a friends-only board
+      so you can settle things with the people you actually know.</li>
+  <li><strong>A Daily Challenge</strong> where everyone in the world flies the exact same
+      seeded course. Same obstacles, same order, same everything — so the score is a clean
+      comparison rather than a story about luck.</li>
+  <li><strong>Head-to-head modes</strong>, including a last-one-standing lobby, so you can
+      play against real people instead of a number.</li>
+  <li><strong>Share cards</strong> that turn a run into an image showing your score and the
+      pipe and tunnel art you unlocked, because "I got 214" is not as satisfying as showing
+      it.</li>
+</ul>
+
+<p>Cosmetics are earned by playing — through scores, levels, daily streaks, podium
+finishes and multiplayer wins — so what you're wearing says something about what you've
+actually done.</p>
 
 <h2>What Neon Drift is</h2>
-<p>Neon Drift is a single-player and multiplayer arcade game where you guide a glowing pilot through an endless neon gauntlet. It features daily challenges, global leaderboards, unlockable cosmetics, and head-to-head modes — all wrapped in a Miami-neon aesthetic.</p>
+
+<p>A fast, reflex-driven neon arcade flyer. You guide a glowing pilot through an endless
+gauntlet, one tap at a time. You'll understand it in seconds and you will not master it
+for a long while.</p>
+
+<p>It's free to play in any browser, and it's on Google Play. There's a Daily Challenge, a
+projectile-dodging Storm mode, head-to-head matches, global and friends leaderboards,
+levels and prestige, unlockable skins, pipe designs and tunnel art, and daily streaks worth
+protecting.</p>
+
+<h2>How it's made</h2>
+
+<p>Neon Drift is built by one person, with no game engine underneath it. It's a single HTML
+file, vanilla JavaScript and a 2D canvas, with a small serverless backend handling
+leaderboards, daily seeds and accounts. The same code runs in a browser tab and inside the
+app — which is why anything I fix reaches everyone at once.</p>
+
+<p>That constraint makes the engineering unusually visible, so I write about it. The
+<a href="/articles/">articles</a> cover things like why a canvas game gets slow, and a
+timing bug that made the game run at different speeds depending on your monitor. The
+<a href="/devlog.html">devlog</a> has shorter, more frequent notes on what's changing.</p>
 
 <h2>Get in touch</h2>
-<p>Questions, feedback, or ideas are always welcome — see the <a href="/contact.html">Contact page</a> or email <a href="mailto:Branclevy@gmail.com">Branclevy@gmail.com</a>.</p>
+
+<p>Questions, bugs, ideas and complaints all reach me directly — there's nobody else to
+route them to. Email <a href="mailto:Branclevy@gmail.com">Branclevy@gmail.com</a> or use
+the <a href="/contact.html">contact page</a>. If something in the game is broken or unfair,
+I'd genuinely rather hear it than not.</p>
+
+<p><a href="/NeonDrift/">Play Neon Drift free in your browser →</a></p>
 
 <nav class="foot">
   <span>About</span>
