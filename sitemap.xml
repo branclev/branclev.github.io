@@ -1,52 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  lastmod is the ONLY per-URL signal in this file that Google actually uses.
+  It has stated repeatedly that it ignores changefreq and priority, so those
+  are kept only for other crawlers.
+
+  Every date below is the real last-commit date of that file. Do NOT stamp
+  everything with today's date to force a recrawl: an inaccurate lastmod gets
+  the whole sitemap distrusted, which is the opposite of what this is for.
+  When you change a page, change its date here in the same commit.
+
+  WHY THIS EXISTS, 2026-08-28: the site was rebuilt on 08-24 and this file
+  carried no lastmod at all, so Google received no signal that eleven pages had
+  changed. Search Console showed 7 of 15 pages indexed, every one last crawled
+  on or before 08-19, and about.html still cached from 07-31 when it was ~180
+  words rather than the ~900 it is now. The AdSense reviewer on 08-21 was
+  therefore looking at a version of this site that no longer exists.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://neondriftgame.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://neondriftgame.com/</loc><lastmod>2026-08-24</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://neondriftgame.com/NeonDrift/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://neondriftgame.com/how-to-play.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://neondriftgame.com/game-modes.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://neondriftgame.com/unlocks-and-skins.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://neondriftgame.com/leaderboard.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://neondriftgame.com/devlog.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://neondriftgame.com/about.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://neondriftgame.com/contact.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://neondriftgame.com/support.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://neondriftgame.com/privacy-policy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://neondriftgame.com/delete-data.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-
-  <url>
-
-    <loc>https://neondriftgame.com/articles/</loc>
-
-    <changefreq>monthly</changefreq>
-
-    <priority>0.8</priority>
-
-  </url>
-  <url>
-
-    <loc>https://neondriftgame.com/articles/canvas-shadowblur-performance.html</loc>
-
-    <changefreq>monthly</changefreq>
-
-    <priority>0.8</priority>
-
-  </url>
-  <url>
-
-    <loc>https://neondriftgame.com/articles/game-loop-refresh-rate.html</loc>
-
-    <changefreq>monthly</changefreq>
-
-    <priority>0.8</priority>
-
-  </url>
-  <url>
-
-    <loc>https://neondriftgame.com/articles/ios-touch-stutter-investigation.html</loc>
-
-    <changefreq>monthly</changefreq>
-
-    <priority>0.8</priority>
-
-  </url>
+  <url><loc>https://neondriftgame.com/articles/</loc><lastmod>2026-08-24</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://neondriftgame.com/articles/canvas-shadowblur-performance.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/articles/game-loop-refresh-rate.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/articles/ios-touch-stutter-investigation.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/devlog.html</loc><lastmod>2026-08-28</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/how-to-play.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/game-modes.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/unlocks-and-skins.html</loc><lastmod>2026-08-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/leaderboard.html</loc><lastmod>2026-08-24</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://neondriftgame.com/about.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://neondriftgame.com/support.html</loc><lastmod>2026-08-28</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://neondriftgame.com/contact.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://neondriftgame.com/privacy-policy.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://neondriftgame.com/delete-data.html</loc><lastmod>2026-08-24</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
 </urlset>
