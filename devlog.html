@@ -103,6 +103,35 @@
 
 <div class="entry">
   <div class="date">AUGUST 29, 2026</div>
+  <h2>Tunnels were quietly costing you points</h2>
+  <p>I went looking for a rendering bug and found an economics one. The complaint was that
+  tunnel artwork looked squashed at high speed, and the obvious suspect was the corridor
+  getting shorter as the game sped up. It isn't. Tunnel length is the same random 200&ndash;300
+  pixels at Wave 7 as at Wave 1, and it never had a speed term in it at all.</p>
+  <p>What changes is how long you get to look at it. The same corridor takes about a second
+  and a half to fly at Wave 1 and two thirds of a second at Wave 7. Same art, less than half
+  the time, and a lot more horizontal streak. That's the whole effect.</p>
+  <p>Chasing it turned up something worse. Nothing else spawns while a tunnel is on screen
+  &mdash; that's deliberate, it's what keeps a pipe from appearing inside one &mdash; and the
+  suppression doesn't lift until the tunnel has fully left. At Wave 1 that's a fair trade for
+  two points. At Wave 7, where pipes come three times as fast, those same two points were
+  worth less than the pipes the tunnel displaced. <strong>The hardest obstacle in the game was
+  a net loss to fly.</strong></p>
+  <p>So tunnels now pay by wave: two points at Wave 1, rising by one each wave, eight at
+  Wave 7. And they pay <em>as you fly them</em>, in equal steps along the corridor, instead of
+  all at once at the far end. Dying halfway through a Wave 7 tunnel now banks four points
+  rather than nothing &mdash; which is how it always should have felt, because you did fly
+  half of it.</p>
+  <p>The part I nearly shipped past: the server checks every submitted score against a
+  plausibility rate, and that rate assumed one point per pipe at a fixed cadence. Measuring
+  the real game against it showed the bound was <em>already</em> too tight before I touched
+  anything &mdash; a maxed-out run needed more elapsed time than a maxed-out run actually
+  takes, so the ceiling was unreachable. Nobody had hit it, so nobody had noticed. Re-derived
+  it from measurements instead of assumptions this time.</p>
+</div>
+
+<div class="entry">
+  <div class="date">AUGUST 29, 2026</div>
   <h2>Koi Pond, and the first combo pack</h2>
   <p>Until now the Store only sold birds. Koi Pond is the first <strong>combo pack</strong>:
   three pieces of one place, sold together rather than scattered across three unlock tracks.
