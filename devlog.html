@@ -102,6 +102,35 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">AUGUST 30, 2026</div>
+  <h2>Profile cards, and the number that had to be stored</h2>
+  <p>Tap a callsign now &mdash; in your friends list, or on any leaderboard &mdash; and you get
+  that pilot's card. Runs flown, skins mastered, Versus win rate, Last Pilot Standing wins,
+  drawn into a scene they picked rather than whatever they happen to be flying today.</p>
+  <p>Most of it was already there without knowing it. Skins mastered is just a count over the
+  per-skin stats the game already keeps. Versus record falls out of the matches table. Last
+  Pilot wins is a count of rows already marked as wins. None of those needed a new number
+  stored anywhere, which is the good kind of feature: the facts were already true, they just
+  had nowhere to be seen.</p>
+  <p>The one that fought back was <em>total runs</em>. There's an obvious derived answer &mdash;
+  sum the per-skin run counts &mdash; and it's wrong, because those only count runs that
+  scored ten or better. Ship it and your card would say 340 while your own Settings screen
+  said 512, with nothing to explain the gap. A stat card whose first job is bragging cannot
+  have a number on it that the owner believes is wrong. So that one gets stored and synced,
+  and it rides along on a request the game already makes at the end of every run rather than
+  adding one.</p>
+  <p>The other decision was what to do with an empty stat. Hiding a zero is tempting and it's
+  the wrong call: a pilot who has lost eight Versus matches and a pilot who has never entered
+  one would look identical. So the rule is that a mode disappears from a card only if it has
+  never been played. An 0-8 record stays. It's a record.</p>
+  <p>One piece of housekeeping I'm glad I did properly: the card reuses the share card's scene
+  rather than copying it. To be sure the extraction hadn't changed anything, I rendered the
+  share card from before and after with the clock frozen and compared the two images byte for
+  byte. Identical. That's a two-minute check that turns "I'm fairly sure I only moved it" into
+  knowing.</p>
+</div>
+
+<div class="entry">
   <div class="date">AUGUST 29, 2026</div>
   <h2>Tunnels were quietly costing you points</h2>
   <p>I went looking for a rendering bug and found an economics one. The complaint was that
