@@ -102,6 +102,39 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 2, 2026</div>
+  <h2>Osaka Night, and four pipes that looked like furniture</h2>
+  <p>The second combo pack is out. Three cosmetics from one idea: the pipes are a window
+  running with rain, the city out of focus behind it; the tunnels are Osaka Castle on its
+  rampart under a neon ring moon, with the moat below and the whole keep hanging upside down
+  in it; the background is the canal from the far side, where the opposite bank is nearly
+  black and every bit of colour in the frame is a reflection.</p>
+  <p>It took six rounds to get the pipe. Four designs were rejected outright, and they all
+  failed the same way: each was a wall with signs on it, and each one read as a
+  <em>filing cabinet</em>. That sounds like a styling problem and it isn't. A pipe interior in
+  this game is 52 pixels wide &mdash; a tall, narrow column &mdash; and anything arranged in a
+  stack down a tall narrow column reads as drawers, no matter how good the individual objects
+  are. The designs that survive are one continuous thing that fills the slot, which is why
+  rain on glass works: it is a single surface, not a shelf of items.</p>
+  <p>The more useful lesson is why it took four tries to notice. Every rejected version had
+  been reviewed at about three times its real size, blown up where it looked great. So I built
+  a renderer that draws the design at the true 52px and puts the strip on screen at 1:1, and
+  made that strip the verdict. The fix was a tool, not better taste. If you are judging art at
+  a size nobody will ever see it at, you are not judging the art.</p>
+  <p>One process note worth keeping. The pack's code shipped to production a day before it
+  went on sale, deliberately switched off, because the store product would not activate. That
+  is not caution for its own sake: the failure it prevents is charging someone and giving them
+  nothing, which happens if the client offers a product the server or the store does not know
+  about. It happened here once, a while back, with a skin. So the order is fixed &mdash;
+  server, then verify the deploy actually landed, then the store product, then the switch
+  &mdash; and a day of the store refusing to cooperate cost exactly nothing, because there was
+  never a button for anyone to press.</p>
+  <p>Like Koi Pond, the whole pack costs zero blur passes. Every glow in it is drawn with
+  gradients, because a shadow blur is charged per draw call and that bill arrives on the
+  cheapest phone somebody plays this on.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 1, 2026</div>
   <h2>They said it was impossible. It was.</h2>
   <p>Several players told me the same thing about the back half of a long run: past
