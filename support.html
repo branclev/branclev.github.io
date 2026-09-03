@@ -302,11 +302,16 @@ physics at a steady 60 steps a second by design, because that's what keeps the D
 Challenge and multiplayer identical for everyone. When the screen's rate keeps moving and
 the game's doesn't, the mismatch can read as judder even though no frames are being
 dropped and nothing is running slow.</p>
-<p>Worth trying: <strong>Settings &rarr; Display &rarr; Smooth Display</strong> and turn it
-off, which pins the screen to 60Hz. A player hit exactly this in September 2026 and it fixed
-it outright. If it helps, that tells me what's going on &mdash; please say so, because I'd
-rather fix this properly than have anyone changing phone settings to play a game. There's a
-candidate fix in testing now.</p>
+<p>The fix: <strong>Settings &rarr; Display &rarr; Smooth Display</strong>, turned off. That
+pins the screen to 60Hz. A player hit exactly this in September 2026 and it cleared it
+outright.</p>
+<p>I would rather not need that, and I did try to fix it in the game first &mdash; the
+obvious candidate was the clock the game uses to time its drawing, and correcting it made no
+difference on the device that had the problem. So for now this is a genuine interaction
+between the game's fixed timing and a screen that keeps changing its own, and the setting is
+the honest answer rather than a brush-off. <strong>If you hit this, please tell me what phone
+you are on</strong> &mdash; I have exactly one confirmed case, and knowing whether it is
+common changes what is worth building.</p>
 
 <h3>The game feels choppy on my phone.</h3>
 <p>Close other tabs and apps first — a browser game shares the device with everything else
