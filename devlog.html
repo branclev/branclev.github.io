@@ -102,6 +102,42 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 3, 2026</div>
+  <h2>Neon Drift Arcade is on the App Store &mdash; and had been approved for three weeks</h2>
+  <p>It is live on iPhone and iPad. Free, same game, same account, same leaderboards; if you
+  play on Android or in a browser you are already competing against the same people.</p>
+  <p>The part worth writing down is how long it took me to notice. Back in August the
+  submission went on hold under guideline 2.1 &mdash; a fraud and identity check, not a
+  problem with the app. I sent Apple what they asked for: a five-minute unbroken screen
+  recording made on a real iPhone, plus answers to five yes/no questions. Then I waited.</p>
+  <p>Apple accepted it <strong>the next day</strong> and approved the app. I found out three
+  weeks later, by querying their API for something unrelated. Every note I had written said
+  "waiting on Apple". Nothing had re-checked after I sent the reply, so the approval sat
+  there unread.</p>
+  <p>What saved me from that being expensive is almost funny: the app had been approved and
+  was downloadable <em>nowhere</em>, because I had never configured which countries it was
+  available in. Pricing was set, the listing was built, the binary was approved &mdash; and
+  the territory list was empty, so the store page simply did not exist. Three weeks of being
+  "live" produced zero installs and zero harm. I would rather have earned that outcome than
+  been handed it.</p>
+  <p>The lesson I have actually written into my notes: <strong>after any submission, poll the
+  API on a schedule.</strong> An email is a single point of failure and I am the failure. And
+  a second one, which is more general: <em>approved</em> and <em>available</em> are different
+  words. An approved app nobody can download is not shipped.</p>
+  <p>So I used the delay. Rather than releasing the binary that was approved &mdash; frozen
+  since mid-August and, by then, eighty-three commits behind the web build &mdash; I shipped
+  a new version first. That mattered more than it sounds: the old build ran the game at about
+  three-quarters speed on high-refresh phones, which is not just slower but <em>easier</em>,
+  and it would have put iPhone players on measurably different daily courses from everyone
+  else on the same shared leaderboards. Launching with that would have been a strange way to
+  start.</p>
+  <p>One thing that is not there yet, in the interest of being straight about it: a challenge
+  link tapped on an iPhone opens in Safari rather than jumping into the app. The game plays
+  fine there and the challenge works normally &mdash; it is the deep-link plumbing that is
+  missing, and it is on the list.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 2, 2026</div>
   <h2>Osaka Night, and four pipes that looked like furniture</h2>
   <p>The second combo pack is out. Three cosmetics from one idea: the pipes are a window
