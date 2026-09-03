@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YB7YSARSFX.com.branclev.neondrift"],
+        "components": [
+          {
+            "/": "/NeonDrift/*",
+            "?": { "c": "?*" },
+            "comment": "Challenge links only - a game URL without ?c= stays in the browser"
+          }
+        ]
+      }
+    ]
+  }
+}
