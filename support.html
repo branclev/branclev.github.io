@@ -294,6 +294,20 @@ your reach even now.</p>
 <p>It's the same game and the same code. The app adds purchases, notifications and offline
 launching. Progress follows your account either way.</p>
 
+<h3>It judders on my phone, but everything else looks fine.</h3>
+<p>If you're on a phone with an <strong>adaptive or "smooth" display</strong> &mdash; a
+Pixel, a Samsung flagship, most recent high-end Android &mdash; the screen changes its
+refresh rate on the fly, jumping between 60Hz and 120Hz while you play. The game runs its
+physics at a steady 60 steps a second by design, because that's what keeps the Daily
+Challenge and multiplayer identical for everyone. When the screen's rate keeps moving and
+the game's doesn't, the mismatch can read as judder even though no frames are being
+dropped and nothing is running slow.</p>
+<p>Worth trying: <strong>Settings &rarr; Display &rarr; Smooth Display</strong> and turn it
+off, which pins the screen to 60Hz. A player hit exactly this in September 2026 and it fixed
+it outright. If it helps, that tells me what's going on &mdash; please say so, because I'd
+rather fix this properly than have anyone changing phone settings to play a game. There's a
+candidate fix in testing now.</p>
+
 <h3>The game feels choppy on my phone.</h3>
 <p>Close other tabs and apps first — a browser game shares the device with everything else
 running. Battery-saver modes can also throttle it. If it's still rough, tell me your exact
