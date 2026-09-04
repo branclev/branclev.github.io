@@ -31,11 +31,15 @@
      Play expect the privacy link to be. */
   nav.tabs {
     position: sticky; top: 0; z-index: 20;
-    display: flex; gap: 6px; align-items: center;
+    display: flex; gap: 5px; align-items: center;
     /* 712px = the 760px content column minus its 24px side padding, so the bar
        lines up with the text on EVERY page. index.html is the reason this is
        needed: there the column is a .wrap div and <body> is full-width, so
-       without this the bar stretched edge to edge and sat left of everything. */
+       without this the bar stretched edge to edge and sat left of everything.
+       🔴 DO NOT WIDEN THIS TO MAKE THE TABS FIT. Tried 2026-09-04 and it only
+       worked on index.html: every other page has its own max-width:720px on
+       <body>, so the bar there can never exceed ~712px whatever this says. The
+       tab row has to fit 712px, which is what the sizes below are set to do. */
     max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
     box-sizing: border-box;
     /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
@@ -50,8 +54,8 @@
   }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs a {
-    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    flex: 0 0 auto; padding: 8px 9px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px;
     color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
     text-decoration: none; margin: 0; line-height: 1.4;
   }
@@ -67,7 +71,21 @@
     box-shadow: 0 0 14px #ff2d7844;
   }
   nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
-  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+  /* The last tab must never sit flush against the clip edge when the bar does
+     scroll — a trailing pad on a flex scroller is dropped by some engines at
+     scroll end, so this goes on the child. */
+  nav.tabs a:last-child { margin-right: 2px; }
+  /* 🔴 THE TAB SIZES ABOVE ARE MEASURED, NOT CHOSEN. The row was 13px/13px-pad/
+     6px-gap and needed 750px in a 712px bar, so ▶ Play — the one tab that
+     matters — was clipped at EVERY desktop width on EVERY page, not just narrow
+     ones. Nobody noticed for weeks because it looks like a design choice.
+     12.5px / 9px pad / 5px gap / 0.2px tracking needs 649px, leaving 63px spare.
+     Measured in DejaVu Sans, which is WIDER than every font in the body stack
+     (-apple-system / Segoe UI / Roboto), so that is a worst case and real
+     browsers have more room, not less. IF YOU ADD OR RENAME A TAB, RE-MEASURE —
+     sum the <a> widths plus the gaps and keep the total under 700. Do not
+     eyeball it, and do not widen nav.tabs instead (see its comment). */
+  @media (max-width: 560px) { nav.tabs { gap: 4px; } nav.tabs a { padding: 8px 8px; font-size: 12px; letter-spacing: 0.1px; } }
 
   /* Footer holds the secondary and legal links. The six main pages live in the
      tab bar at the top, so repeating them down here was noise — but Privacy and
@@ -100,6 +118,42 @@
 <p class="sub">A running log of what's new in the game. Newest first — check back often.</p>
 
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
+
+<div class="entry">
+  <div class="date">SEPTEMBER 3, 2026</div>
+  <h2>Neon Drift Arcade is on the App Store &mdash; and had been approved for three weeks</h2>
+  <p>It is live on iPhone and iPad. Free, same game, same account, same leaderboards; if you
+  play on Android or in a browser you are already competing against the same people.</p>
+  <p>The part worth writing down is how long it took me to notice. Back in August the
+  submission went on hold under guideline 2.1 &mdash; a fraud and identity check, not a
+  problem with the app. I sent Apple what they asked for: a five-minute unbroken screen
+  recording made on a real iPhone, plus answers to five yes/no questions. Then I waited.</p>
+  <p>Apple accepted it <strong>the next day</strong> and approved the app. I found out three
+  weeks later, by querying their API for something unrelated. Every note I had written said
+  "waiting on Apple". Nothing had re-checked after I sent the reply, so the approval sat
+  there unread.</p>
+  <p>What saved me from that being expensive is almost funny: the app had been approved and
+  was downloadable <em>nowhere</em>, because I had never configured which countries it was
+  available in. Pricing was set, the listing was built, the binary was approved &mdash; and
+  the territory list was empty, so the store page simply did not exist. Three weeks of being
+  "live" produced zero installs and zero harm. I would rather have earned that outcome than
+  been handed it.</p>
+  <p>The lesson I have actually written into my notes: <strong>after any submission, poll the
+  API on a schedule.</strong> An email is a single point of failure and I am the failure. And
+  a second one, which is more general: <em>approved</em> and <em>available</em> are different
+  words. An approved app nobody can download is not shipped.</p>
+  <p>So I used the delay. Rather than releasing the binary that was approved &mdash; frozen
+  since mid-August and, by then, eighty-three commits behind the web build &mdash; I shipped
+  a new version first. That mattered more than it sounds: the old build ran the game at about
+  three-quarters speed on high-refresh phones, which is not just slower but <em>easier</em>,
+  and it would have put iPhone players on measurably different daily courses from everyone
+  else on the same shared leaderboards. Launching with that would have been a strange way to
+  start.</p>
+  <p>One thing that is not there yet, in the interest of being straight about it: a challenge
+  link tapped on an iPhone opens in Safari rather than jumping into the app. The game plays
+  fine there and the challenge works normally &mdash; it is the deep-link plumbing that is
+  missing, and it is on the list.</p>
+</div>
 
 <div class="entry">
   <div class="date">SEPTEMBER 2, 2026</div>

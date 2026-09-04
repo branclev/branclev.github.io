@@ -24,11 +24,15 @@
      Play expect the privacy link to be. */
   nav.tabs {
     position: sticky; top: 0; z-index: 20;
-    display: flex; gap: 6px; align-items: center;
+    display: flex; gap: 5px; align-items: center;
     /* 712px = the 760px content column minus its 24px side padding, so the bar
        lines up with the text on EVERY page. index.html is the reason this is
        needed: there the column is a .wrap div and <body> is full-width, so
-       without this the bar stretched edge to edge and sat left of everything. */
+       without this the bar stretched edge to edge and sat left of everything.
+       🔴 DO NOT WIDEN THIS TO MAKE THE TABS FIT. Tried 2026-09-04 and it only
+       worked on index.html: every other page has its own max-width:720px on
+       <body>, so the bar there can never exceed ~712px whatever this says. The
+       tab row has to fit 712px, which is what the sizes below are set to do. */
     max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
     box-sizing: border-box;
     /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
@@ -43,8 +47,8 @@
   }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs a {
-    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    flex: 0 0 auto; padding: 8px 9px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px;
     color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
     text-decoration: none; margin: 0; line-height: 1.4;
   }
@@ -60,7 +64,21 @@
     box-shadow: 0 0 14px #ff2d7844;
   }
   nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
-  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+  /* The last tab must never sit flush against the clip edge when the bar does
+     scroll — a trailing pad on a flex scroller is dropped by some engines at
+     scroll end, so this goes on the child. */
+  nav.tabs a:last-child { margin-right: 2px; }
+  /* 🔴 THE TAB SIZES ABOVE ARE MEASURED, NOT CHOSEN. The row was 13px/13px-pad/
+     6px-gap and needed 750px in a 712px bar, so ▶ Play — the one tab that
+     matters — was clipped at EVERY desktop width on EVERY page, not just narrow
+     ones. Nobody noticed for weeks because it looks like a design choice.
+     12.5px / 9px pad / 5px gap / 0.2px tracking needs 649px, leaving 63px spare.
+     Measured in DejaVu Sans, which is WIDER than every font in the body stack
+     (-apple-system / Segoe UI / Roboto), so that is a worst case and real
+     browsers have more room, not less. IF YOU ADD OR RENAME A TAB, RE-MEASURE —
+     sum the <a> widths plus the gaps and keep the total under 700. Do not
+     eyeball it, and do not widen nav.tabs instead (see its comment). */
+  @media (max-width: 560px) { nav.tabs { gap: 4px; } nav.tabs a { padding: 8px 8px; font-size: 12px; letter-spacing: 0.1px; } }
 
   /* Footer holds the secondary and legal links. The six main pages live in the
      tab bar at the top, so repeating them down here was noise — but Privacy and
@@ -102,11 +120,40 @@ involving a purchase, roughly when it happened.</p>
 <p>Sign in with the same account you linked before, then open the Store in the mobile app
 and tap <strong>Restore Purchases</strong>. Your callsign, leaderboard history and purchased
 content come back with it.</p>
+<p><strong>On iPhone or iPad you can buy without signing in</strong>, so if you never linked an
+account, use the same Apple&nbsp;ID on the new device and tap <strong>Restore Purchases</strong>
+&mdash; the App Store is what remembers the purchase. That restores what you bought but not
+your progress or leaderboard history, which need a linked account. Signing in afterwards
+attaches those purchases to your account so they follow you to other devices too.</p>
+
+<h3>I moved to iPhone and my levels, skin mastery and Storm score didn't come with me</h3>
+<p>This one's on me, and I can fix it by hand today. On iPhone and iPad,
+<strong>Sign in with Apple is the only sign-in</strong> &mdash; Google sign-in isn't offered
+there. So when you sign in with Apple for the first time, the game has no way to tell that
+you're the same person who played on Android or the web, and it starts you a brand-new
+account. Your old account is untouched and nothing is lost; it just isn't the one you're
+signed into.</p>
+<p>Some things still look right because leaderboard entries are stored under your
+<em>callsign</em> &mdash; your classic best will follow you over. Levels, skin mastery, Storm
+score and purchases are stored under your <em>account</em>, so those stay behind.</p>
+<p>Email <a href="mailto:Brandon@neondriftgame.com">Brandon@neondriftgame.com</a> with your
+callsign and say you moved to iPhone. I'll point your Apple sign-in at your original account,
+and everything reappears the next time you open the game. There's nothing you need to do in
+the app first, and please don't delete anything while you wait.</p>
+<p>A proper in-app version of this is being built &mdash; you'll claim a short code on the web
+or on Android and enter it on your iPhone, no email needed.</p>
+
+<h3>It says my callsign "belongs to another account"</h3>
+<p>Same cause as the question above, and the same fix: email
+<a href="mailto:Brandon@neondriftgame.com">Brandon@neondriftgame.com</a> with your callsign.
+A callsign can only ever be linked to the one account that first claimed it, which is what
+stops anyone from taking over your name &mdash; so the merge has to go through me for now.</p>
 
 <h3>Do I have to make an account?</h3>
 <p>No. You can play the entire game without signing in. Linking an account is what lets your
 progress survive a reinstall or move between devices, and it's required to appear on the
-global leaderboards — but it's your choice.</p>
+global leaderboards — but it's your choice. On iPhone and iPad you can also buy without an
+account; on Android, purchases are tied to your linked account so they can be restored.</p>
 
 <h3>What's a callsign?</h3>
 <p>Your name on every leaderboard and in every match. It's how other players see you and how
@@ -155,8 +202,10 @@ can memorise one course and farm it. Challenge runs never go on a leaderboard.</
 to it would let people practise before their real run.</p>
 
 <h3>My link doesn't open the app.</h3>
-<p>It should on Android if the app is installed. If it opens a browser instead, the game still
-works there and your progress follows your account either way.</p>
+<p>It should on Android if the app is installed. <strong>On iPhone and iPad it opens in the
+browser</strong> — that is expected for now, not a fault. Either way the game runs properly in
+the browser and your progress follows your account, so the challenge works the same; it just
+starts in Safari rather than in the app.</p>
 
 <h2>Seasonal skins</h2>
 
@@ -285,6 +334,25 @@ your reach even now.</p>
 <h3>Browser or app — is there a difference?</h3>
 <p>It's the same game and the same code. The app adds purchases, notifications and offline
 launching. Progress follows your account either way.</p>
+
+<h3>It judders on my phone, but everything else looks fine.</h3>
+<p>If you're on a phone with an <strong>adaptive or "smooth" display</strong> &mdash; a
+Pixel, a Samsung flagship, most recent high-end Android &mdash; the screen changes its
+refresh rate on the fly, jumping between 60Hz and 120Hz while you play. The game runs its
+physics at a steady 60 steps a second by design, because that's what keeps the Daily
+Challenge and multiplayer identical for everyone. When the screen's rate keeps moving and
+the game's doesn't, the mismatch can read as judder even though no frames are being
+dropped and nothing is running slow.</p>
+<p>The fix: <strong>Settings &rarr; Display &rarr; Smooth Display</strong>, turned off. That
+pins the screen to 60Hz. A player hit exactly this in September 2026 and it cleared it
+outright.</p>
+<p>I would rather not need that, and I did try to fix it in the game first &mdash; the
+obvious candidate was the clock the game uses to time its drawing, and correcting it made no
+difference on the device that had the problem. So for now this is a genuine interaction
+between the game's fixed timing and a screen that keeps changing its own, and the setting is
+the honest answer rather than a brush-off. <strong>If you hit this, please tell me what phone
+you are on</strong> &mdash; I have exactly one confirmed case, and knowing whether it is
+common changes what is worth building.</p>
 
 <h3>The game feels choppy on my phone.</h3>
 <p>Close other tabs and apps first — a browser game shares the device with everything else

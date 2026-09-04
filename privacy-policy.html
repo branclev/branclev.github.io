@@ -39,11 +39,15 @@
      Play expect the privacy link to be. */
   nav.tabs {
     position: sticky; top: 0; z-index: 20;
-    display: flex; gap: 6px; align-items: center;
+    display: flex; gap: 5px; align-items: center;
     /* 712px = the 760px content column minus its 24px side padding, so the bar
        lines up with the text on EVERY page. index.html is the reason this is
        needed: there the column is a .wrap div and <body> is full-width, so
-       without this the bar stretched edge to edge and sat left of everything. */
+       without this the bar stretched edge to edge and sat left of everything.
+       🔴 DO NOT WIDEN THIS TO MAKE THE TABS FIT. Tried 2026-09-04 and it only
+       worked on index.html: every other page has its own max-width:720px on
+       <body>, so the bar there can never exceed ~712px whatever this says. The
+       tab row has to fit 712px, which is what the sizes below are set to do. */
     max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
     box-sizing: border-box;
     /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
@@ -58,8 +62,8 @@
   }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs a {
-    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    flex: 0 0 auto; padding: 8px 9px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px;
     color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
     text-decoration: none; margin: 0; line-height: 1.4;
   }
@@ -75,7 +79,21 @@
     box-shadow: 0 0 14px #ff2d7844;
   }
   nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
-  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+  /* The last tab must never sit flush against the clip edge when the bar does
+     scroll — a trailing pad on a flex scroller is dropped by some engines at
+     scroll end, so this goes on the child. */
+  nav.tabs a:last-child { margin-right: 2px; }
+  /* 🔴 THE TAB SIZES ABOVE ARE MEASURED, NOT CHOSEN. The row was 13px/13px-pad/
+     6px-gap and needed 750px in a 712px bar, so ▶ Play — the one tab that
+     matters — was clipped at EVERY desktop width on EVERY page, not just narrow
+     ones. Nobody noticed for weeks because it looks like a design choice.
+     12.5px / 9px pad / 5px gap / 0.2px tracking needs 649px, leaving 63px spare.
+     Measured in DejaVu Sans, which is WIDER than every font in the body stack
+     (-apple-system / Segoe UI / Roboto), so that is a worst case and real
+     browsers have more room, not less. IF YOU ADD OR RENAME A TAB, RE-MEASURE —
+     sum the <a> widths plus the gaps and keep the total under 700. Do not
+     eyeball it, and do not widen nav.tabs instead (see its comment). */
+  @media (max-width: 560px) { nav.tabs { gap: 4px; } nav.tabs a { padding: 8px 8px; font-size: 12px; letter-spacing: 0.1px; } }
 
   /* Footer holds the secondary and legal links. The six main pages live in the
      tab bar at the top, so repeating them down here was noise — but Privacy and
@@ -106,7 +124,7 @@
 </nav>
 
 <h1>Neon Drift — Privacy Policy</h1>
-<p class="updated">Last updated: August 12, 2026</p>
+<p class="updated">Last updated: September 3, 2026</p>
 
 <p>Neon Drift ("the game," "we," "us") is an arcade game with optional online leaderboards, social features, and cosmetic purchases. This page explains what information the game collects, how it's used, and what choices you have.</p>
 
@@ -117,7 +135,7 @@
   <li><strong>Game scores and stats</strong> — your scores, level, and equipped cosmetic skin, used to display leaderboards (All-Time, weekly, Daily, and Storm) and multiplayer results.</li>
   <li><strong>Your profile card</strong> — if you link an account, other players can tap your callsign on a leaderboard or in a friends list and see a card showing your callsign, level, best score, total runs flown, skins mastered, Versus win/loss record, Last Pilot Standing wins, Daily Challenge podium finishes, and the cosmetics you chose to display. <strong>This card is public.</strong> It is visible to anyone using the game, not only to your friends, and it does not require them to be signed in. Everything on it is derived from play you have already posted to a leaderboard or a match; it contains nothing you have not chosen to enter into the game.</li>
   <li><strong>Multiplayer match data</strong> — if you play Versus matches or Last Pilot Standing, the results of those matches (participating callsigns, scores, outcomes, and equipped skins) are stored as match history and win records.</li>
-  <li><strong>Local game progress</strong> — settings, unlocked cosmetics, and progress are stored locally on your device (via browser local storage). If you link a Google account (see below), your experience points and purchase-based unlocks are also backed up to our servers so they can be restored on other devices.</li>
+  <li><strong>Local game progress</strong> — settings, unlocked cosmetics, and progress are stored locally on your device (via browser local storage). If you link an account (see below), your experience points and purchase-based unlocks are also backed up to our servers so they can be restored on other devices.</li>
 </ul>
 <p>We do <strong>not</strong> collect your real name, email address, phone number, precise location, contacts, or photos. Neon Drift does not currently display any ads; if optional rewarded ads are introduced (see <em>Advertising</em> below) they will be non-personalized, and we will not use advertising identifiers to build a profile of you or track you across other apps.</p>
 
@@ -128,8 +146,8 @@
 <p>Online game data is stored using Supabase, a third-party database hosting provider. Local game settings and progress are stored only on your own device and are never transmitted except when directly relevant to a game feature (leaderboard submissions, multiplayer matches, account linking, purchases, or progress backup as described on this page).</p>
 
 <h2>Purchases</h2>
-<p>Neon Drift offers optional cosmetic purchases (individual skins and a Supporter Pack). All payments are processed entirely by Google Play — <strong>we never receive or store your payment card details, billing address, or other payment information</strong>. To deliver what you bought and keep it restorable on your other devices, we store a record of each purchase (the product purchased and a purchase token issued by Google Play) associated with your linked Google account identifier. We verify purchases and check for refunds directly with Google Play; if a purchase is refunded, the associated content is removed from your account.</p>
-<p>Purchases require a linked Google account (see below) so they can be restored if you switch devices or reinstall the game.</p>
+<p>Neon Drift offers optional cosmetic purchases (individual skins, combo packs and a Supporter Pack). All payments are processed entirely by <strong>Google Play</strong> (Android) or the <strong>App Store</strong> (iOS) — <strong>we never receive or store your payment card details, billing address, or other payment information</strong>. To deliver what you bought and keep it restorable on your other devices, we store a record of each purchase (the product purchased, and a purchase token or transaction identifier issued by Google Play or Apple) associated with your linked account identifier. We verify purchases and check for refunds directly with Google Play or Apple; if a purchase is refunded, the associated content is removed from your account.</p>
+<p>On <strong>Android</strong>, purchases require a linked account (see below) so they can be restored if you switch devices or reinstall the game. On <strong>iOS</strong>, you can buy <strong>without signing in</strong> — the App Store ties the purchase to your Apple&nbsp;ID, and the content unlocks on that device. If you later sign in, tapping <strong>Restore Purchases</strong> attaches those purchases to your account so they carry to your other devices.</p>
 
 <h2>Advertising</h2>
 <p><strong>Neon Drift does not currently show any ads.</strong> We intend to offer optional <strong>rewarded</strong> ads provided by Google AdSense (H5 Games Ads), and this section describes how they will work when they are enabled. They will appear only when you choose to watch one in exchange for an in-game benefit — for example, one extra Daily Challenge attempt — and will never be forced or shown during normal play. We request <strong>non-personalized</strong> ads, meaning ads are based on general context rather than a profile built from your activity, and we do not use advertising identifiers to track you across other apps. To serve, limit the frequency of, and measure these ads and to detect fraud or abuse, Google may process limited data as described in <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>. Neon Drift is intended for players aged 13 and older.</p>
@@ -141,13 +159,13 @@
 <p>All-time and Storm leaderboard entries are retained indefinitely, tied to your chosen callsign, so your best score can be displayed and updated over time. Daily Challenge leaderboard entries older than 60 days are automatically deleted on a routine basis. Multiplayer match history and win records are retained as point-in-time records. Purchase records are retained while your entitlement to the purchased content remains active.</p>
 
 <h2>Account linking</h2>
-<p>Neon Drift offers an optional feature that lets you link your chosen callsign to your Google account using Google Sign-In. This is intended to:</p>
+<p>Neon Drift offers an optional feature that lets you link your chosen callsign to your account, using <strong>Google Sign-In</strong> or <strong>Sign in with Apple</strong> (iOS). This is intended to:</p>
 <ul>
   <li>Help prevent other players from using a callsign that isn't theirs,</li>
   <li>Let your callsign, leaderboard history, progress, and purchases be restored if you switch devices, reinstall the game, or clear your browser data, and</li>
-  <li>Enable social features (Friends, Versus challenges, Last Pilot Standing lobbies, and purchases), which are only available to linked accounts.</li>
+  <li>Enable social features (Friends, Versus challenges, and Last Pilot Standing lobbies), which are only available to linked accounts. Purchases also require a linked account on Android; on iOS they do not (see Purchases above).</li>
 </ul>
-<p>This feature is <strong>optional</strong> — the game continues to work with a self-chosen callsign alone if you prefer not to link an account, though social features and purchases won't be available. If you choose to link your account, we store a unique identifier provided by Google Sign-In, associated with your callsign. We do not access your Google account's real name, email address, contacts, or other Google account data beyond what's needed for this verification.</p>
+<p>This feature is <strong>optional</strong> — the game continues to work with a self-chosen callsign alone if you prefer not to link an account, though social features won't be available. If you choose to link your account, we store a unique identifier provided by Google Sign-In or by Sign in with Apple, associated with your callsign. We do not access your real name, email address, contacts, or other account data from either provider beyond what's needed for this verification, and Sign in with Apple lets you hide your email address from us entirely.</p>
 <p>If you rename a linked callsign, your leaderboard history (All-Time, Daily, and Storm) is moved to the new name as part of that process.</p>
 
 <h2>Friends</h2>
@@ -157,7 +175,7 @@
 <p>If you choose to enable push notifications (for friend requests, challenge invitations, and match results), we store a device push token issued by Firebase Cloud Messaging, associated with your linked account. This token identifies your device for message delivery only. It is deleted when you turn notifications off in the game's settings, and tokens that permanently stop working (for example, after an uninstall) are removed automatically.</p>
 
 <h2>Your choices</h2>
-<p>You can play without linking any account. You can turn push notifications off at any time in Settings. If you'd like your data removed, linked accounts can delete all their data instantly in-game (Settings &rarr; Profile &rarr; Danger Zone &rarr; Delete My Data) — see our <a href="/delete-data.html">data deletion page</a> for details and for the email process, or contact us using the information below. If you haven't linked a Google account, your callsign is self-chosen and not tied to any verified identity, so we may be unable to confirm ownership of a specific callsign, but we'll do our best to assist.</p>
+<p>You can play without linking any account. You can turn push notifications off at any time in Settings. If you'd like your data removed, linked accounts can delete all their data instantly in-game (Settings &rarr; Profile &rarr; Danger Zone &rarr; Delete My Data) — see our <a href="/delete-data.html">data deletion page</a> for details and for the email process, or contact us using the information below. If you haven't linked an account, your callsign is self-chosen and not tied to any verified identity, so we may be unable to confirm ownership of a specific callsign, but we'll do our best to assist.</p>
 
 <h2>Children's privacy</h2>
 <p>Neon Drift is intended for a general audience and is not directed specifically at children under 13. We do not knowingly collect personal information from children.</p>

@@ -39,11 +39,15 @@
      Play expect the privacy link to be. */
   nav.tabs {
     position: sticky; top: 0; z-index: 20;
-    display: flex; gap: 6px; align-items: center;
+    display: flex; gap: 5px; align-items: center;
     /* 712px = the 760px content column minus its 24px side padding, so the bar
        lines up with the text on EVERY page. index.html is the reason this is
        needed: there the column is a .wrap div and <body> is full-width, so
-       without this the bar stretched edge to edge and sat left of everything. */
+       without this the bar stretched edge to edge and sat left of everything.
+       🔴 DO NOT WIDEN THIS TO MAKE THE TABS FIT. Tried 2026-09-04 and it only
+       worked on index.html: every other page has its own max-width:720px on
+       <body>, so the bar there can never exceed ~712px whatever this says. The
+       tab row has to fit 712px, which is what the sizes below are set to do. */
     max-width: 712px; margin: 0 auto 26px; padding: 10px 0;
     box-sizing: border-box;
     /* Fully opaque, and NO backdrop-filter. A translucent blurred sticky bar is
@@ -58,8 +62,8 @@
   }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs a {
-    flex: 0 0 auto; padding: 8px 13px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+    flex: 0 0 auto; padding: 8px 9px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px;
     color: #9fb0c8; border: 1px solid transparent; white-space: nowrap;
     text-decoration: none; margin: 0; line-height: 1.4;
   }
@@ -75,7 +79,21 @@
     box-shadow: 0 0 14px #ff2d7844;
   }
   nav.tabs a.tab-play:hover { color: #0a0014; border-color: transparent; }
-  @media (max-width: 520px) { nav.tabs a { padding: 8px 11px; font-size: 12.5px; } }
+  /* The last tab must never sit flush against the clip edge when the bar does
+     scroll — a trailing pad on a flex scroller is dropped by some engines at
+     scroll end, so this goes on the child. */
+  nav.tabs a:last-child { margin-right: 2px; }
+  /* 🔴 THE TAB SIZES ABOVE ARE MEASURED, NOT CHOSEN. The row was 13px/13px-pad/
+     6px-gap and needed 750px in a 712px bar, so ▶ Play — the one tab that
+     matters — was clipped at EVERY desktop width on EVERY page, not just narrow
+     ones. Nobody noticed for weeks because it looks like a design choice.
+     12.5px / 9px pad / 5px gap / 0.2px tracking needs 649px, leaving 63px spare.
+     Measured in DejaVu Sans, which is WIDER than every font in the body stack
+     (-apple-system / Segoe UI / Roboto), so that is a worst case and real
+     browsers have more room, not less. IF YOU ADD OR RENAME A TAB, RE-MEASURE —
+     sum the <a> widths plus the gaps and keep the total under 700. Do not
+     eyeball it, and do not widen nav.tabs instead (see its comment). */
+  @media (max-width: 560px) { nav.tabs { gap: 4px; } nav.tabs a { padding: 8px 8px; font-size: 12px; letter-spacing: 0.1px; } }
 
   /* Footer holds the secondary and legal links. The six main pages live in the
      tab bar at the top, so repeating them down here was noise — but Privacy and
@@ -106,31 +124,31 @@
 </nav>
 
 <h1>Neon Drift — Delete Your Data</h1>
-<p class="updated">Last updated: July 22, 2026</p>
+<p class="updated">Last updated: September 3, 2026</p>
 
-<p>Neon Drift (developed by branclev) identifies players by a self-chosen <strong>callsign</strong>, which can optionally be linked to a Google account for cross-device restore, social features, and purchases. This page explains how to have your data deleted.</p>
+<p>Neon Drift (developed by branclev) identifies players by a self-chosen <strong>callsign</strong>, which can optionally be linked to a <strong>Google account</strong> or, on iPhone and iPad, to <strong>Sign in with Apple</strong> — for cross-device restore and social features. (Purchases need a linked account on Android; on iOS they do not.) This page explains how to have your data deleted.</p>
 
 <h2>Option 1: Delete in-game (instant, recommended)</h2>
-<p>If your callsign is linked to a Google account, you can delete all your data directly in the game:</p>
+<p>If your callsign is linked to an account — Google or Apple — you can delete all your data directly in the game:</p>
 <ol>
   <li>Open <strong>Settings</strong> from the main menu (Profile tab).</li>
-  <li>Make sure you're signed in with your linked Google account (the game may prompt you to sign in — this is how we verify the data is yours).</li>
+  <li>Make sure you're signed in with the account you linked (the game may prompt you to sign in — this is how we verify the data is yours).</li>
   <li>Scroll to the <strong>Danger Zone</strong> at the bottom and tap <strong>DELETE MY DATA</strong>.</li>
   <li>You'll be asked to confirm. Deletion is immediate and includes your purchase records (see the note below).</li>
 </ol>
 
 <h2>Option 2: Request by email</h2>
-<p>If you never linked a Google account, or no longer have access to the game:</p>
+<p>If you never linked an account, or no longer have access to the game:</p>
 <ol>
   <li>Send an email to <a href="mailto:Brandon@neondriftgame.com">Brandon@neondriftgame.com</a> with the subject line <strong>"Delete my data"</strong>.</li>
-  <li>Include the exact <strong>callsign</strong> you used in the game. If your callsign is linked to a Google account, please send the request from the Gmail address of that Google account so we can verify ownership.</li>
+  <li>Include the exact <strong>callsign</strong> you used in the game. If your callsign is linked to a <strong>Google account</strong>, send the request from that account's Gmail address so we can verify ownership. If you used <strong>Sign in with Apple</strong>, send it from the address Apple shares with the app — including a private <code>@privaterelay.appleid.com</code> relay address, which works fine for this. If you can't reach either address, say so in the email and we'll verify another way rather than leave you without a route.</li>
   <li>We'll delete the data described below, typically within 7 days.</li>
 </ol>
 
 <h2>What gets deleted</h2>
 <ul>
   <li>Your callsign and all associated leaderboard scores (All-Time, Daily, and Storm), including your recorded level and equipped skin</li>
-  <li>Your Google account link (the Google-issued identifier associating your account with your callsign)</li>
+  <li>Your account link — the identifier issued by Google Sign-In or by Sign in with Apple that associates your account with your callsign</li>
   <li>Your server-side progress backup (experience points)</li>
   <li>Your friend relationships, and pending friend requests sent or received</li>
   <li>Your Versus match history and Last Pilot Standing participation records</li>
@@ -139,12 +157,12 @@
 </ul>
 
 <h2>Important note about purchases</h2>
-<p>Deleting your data includes deleting our record of your in-game purchases. This does <strong>not</strong> erase your ownership with Google: your Google Play order history remains with Google (we can't delete that, and refunds remain subject to Google Play's own refund policies). If you later link the same Google account in the game again, tapping <strong>Restore Purchases</strong> in the Store re-verifies your purchases with Google Play and brings your purchased content back.</p>
+<p>Deleting your data includes deleting our record of your in-game purchases. This does <strong>not</strong> erase your ownership with the store you bought from: your <strong>Google Play</strong> order history stays with Google and your <strong>App Store</strong> purchase history stays with Apple (we can't delete either, and refunds remain subject to each store's own refund policies). To get purchased content back afterwards, tap <strong>Restore Purchases</strong> in the Store: on Android, sign in with the same linked account first; on iPhone and iPad, just use the same Apple&nbsp;ID — no account or sign-in needed, because the App Store is what remembers the purchase.</p>
 
 <h2>What isn't affected</h2>
 <ul>
   <li><strong>Local device data</strong> — your in-game progress, unlocked cosmetics, and settings are stored only on your own device and are not something we can remotely delete. You can clear this yourself at any time by clearing the app's storage/data through your device settings, or by uninstalling the app.</li>
-  <li><strong>Google Play records</strong> — your purchase/order history with Google Play belongs to Google and is governed by <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</li>
+  <li><strong>Store purchase records</strong> — your purchase/order history belongs to the store you bought from: Google Play history is governed by <a href="https://policies.google.com/privacy">Google's privacy policy</a>, and App Store history by <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>.</li>
   <li><strong>Backups</strong> — data may briefly persist in routine database backups after a deletion request, until those backups naturally cycle out. It is removed from all active systems upon request.</li>
 </ul>
 
