@@ -120,6 +120,48 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 5, 2026</div>
+  <h2>Five new Versus modifiers, and the two bugs they dragged out with them</h2>
+  <p>Versus had four modifiers. It now has nine: <strong>Featherweight</strong> for long
+  floaty arcs, <strong>Second Wind</strong> to survive your first crash, <strong>Metronome</strong>
+  to make the openings follow a steady wave you can learn instead of jumping about,
+  <strong>Mirror</strong> to swap the tap zones, and <strong>Flicker</strong> to make the
+  neon gutter. They are built to stack &mdash; each one changes a different part of the
+  game, so you can run all eight of the non-Storm ones at once if you like.</p>
+  <p>Both of the interesting things that happened were failures, so those are what I want
+  to write down.</p>
+  <p><strong>Featherweight looked correct and was not.</strong> The game caps how far one
+  gap can jump from the last, and that cap is worked out from the bird's physics &mdash;
+  the thing I wrote about on September 1. So a modifier that changes the physics
+  invalidates it. I thought I had that covered: I tuned Featherweight so a single flap
+  reached exactly the same height as normal, 62 pixels against 62.5, and reasoned that
+  identical height meant identical reach. It does not. What matters over the gap between
+  two pipes is not how high one flap gets you, it is how fast you can climb across
+  fifty-odd frames &mdash; and a gentler flap buys less height per tap no matter where a
+  single one tops out. Measured, it fell 40 to 45 pixels short on every capped wave. I had
+  rebuilt the exact bug I fixed four days earlier, in a modifier, while believing I had
+  designed around it.</p>
+  <p>So the cap is no longer a number in a table. It is computed from whatever physics are
+  actually in force when the run starts. A table cannot survive modifiers that stack, and
+  the fix had to be structural rather than another careful choice of number.</p>
+  <p><strong>Then that machinery found something that had been live for weeks.</strong>
+  With nine modifiers there are 288 legal combinations, which is well past what anyone can
+  check by hand, so I wrote a harness that drives the real game and tries all of them.
+  It came back with a failure in <strong>Hyper Mode</strong> &mdash; nothing to do with the
+  new modifiers at all. Hyper Mode raises pipe speed but leaves the spacing alone, which
+  shrinks the time you have between one gap and the next, and on the early waves there is
+  no cap at all to catch it. At Wave 4 it could deal a jump 32 pixels beyond what the bird
+  can reach. Same bug as before, in a modifier that had been shipping since long before I
+  went looking.</p>
+  <p>The lesson I keep relearning: the reason to build the check is not to prove the new
+  thing works. It is that the check goes and looks at everything else too.</p>
+  <p>Also fixed: the Play button in the site's top bar was cut off at every window size,
+  on every page, because the row of tabs needed 750 pixels inside a 712 pixel bar. It had
+  been that way since the bar shipped, and it looked enough like a design choice that
+  nobody mentioned it, including me.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 3, 2026</div>
   <h2>Neon Drift Arcade is on the App Store &mdash; and had been approved for three weeks</h2>
   <p>It is live on iPhone and iPad. Free, same game, same account, same leaderboards; if you
