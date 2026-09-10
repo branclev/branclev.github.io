@@ -141,9 +141,11 @@
 
 <h3>Modifiers</h3>
 <p>The challenger picks the rules and they're locked for both sides. There are
-<strong>eight</strong>, and they're built to stack — each one changes a different part
+<strong>thirteen</strong>, and they're built to stack — each one changes a different part
 of the game, so almost any set you can name is legal. Some make a run harder, some
-make it easier, and a couple just make it strange.</p>
+make it easier, and a couple just make it strange. Five of them are <strong>boons</strong>:
+they exist to make a match kinder rather than crueller, which turns out to be its own
+kind of interesting when both sides get them.</p>
 <ul>
   <li><strong>Storm</strong> — no pipes at all, just a stream of oncoming fire.</li>
   <li><strong>Hyper Mode</strong> — pipe speed locked high from the very first gate.</li>
@@ -153,12 +155,25 @@ make it easier, and a couple just make it strange.</p>
   <li><strong>Second Wind</strong> — survive your first crash. Once per run.</li>
   <li><strong>Metronome</strong> — the openings follow a steady wave instead of jumping about, so the course becomes something you can learn rather than only react to.</li>
   <li><strong>Mirror</strong> — the tap zones swap. Top flaps up, bottom flaps down.</li>
+  <li><strong>Clearance</strong> — every gap is a quarter wider. Same speed, same rhythm, more room.</li>
+  <li><strong>Scout</strong> — a marker on the left edge tracks the centre of the next gap, so you can line up before you can see it.</li>
+  <li><strong>Grace</strong> — a more forgiving hitbox. Edges you would normally catch let you through.</li>
+  <li><strong>Tailwind</strong> — pipes travel at the previous wave's speed all run, so you always get longer to read them.</li>
+  <li><strong>Starfall</strong> — stars appear twice as often, and every one is still a point.</li>
 </ul>
-<p>The only thing the game refuses is Storm combined with anything that acts on pipes
-— Hyper Mode, All Tunnels and Metronome — because Storm hasn't got any pipes for
-them to act on. Everything else goes together: you can run all seven of the others
-at once if you want to find out what that does, or stack four of them on top of
-Storm.</p>
+<p>Two rules decide what can go together, and both come from the same idea: a
+modifier has to still mean something once the others are applied.</p>
+<ul>
+  <li><strong>Storm refuses anything that acts on pipes</strong> — Hyper Mode, All Tunnels,
+  Metronome, Clearance, Scout and Tailwind — because Storm hasn't got any pipes for them
+  to act on.</li>
+  <li><strong>Two modifiers that change the same thing can't both be on.</strong> Today that
+  is exactly one pair: Hyper Mode and Tailwind both set pipe speed, and turning on both
+  would just mean one of them silently losing.</li>
+</ul>
+<p>Everything else goes together. The biggest legal stack is <strong>eleven at once</strong>,
+and if you build on top of Storm you can add six. All told there are <strong>3,135</strong>
+legal combinations, which is rather more than anyone is going to work through.</p>
 
 <h2>Last Pilot Standing</h2>
 <p>The showpiece mode: a <strong>live multiplayer battle royale</strong>. You queue up, gather in a waiting room with the other pilots, and the match fast-starts once enough players are in. From there, everyone flies at once and drops out as they crash — when you're eliminated you spectate the survivors in real time.</p>
@@ -173,13 +188,20 @@ Storm.</p>
 <a class="cta" href="/NeonDrift/">▶ Play Neon Drift</a>
 <h2>Challenges</h2>
 
-<p>Not a separate mode &mdash; a way to send someone a Classic run. After any Classic
-game over, <strong>CHALLENGE A FRIEND</strong> gives you a link to the exact course you
-just flew, with your score attached.</p>
+<p>Not a separate mode &mdash; a way to send someone a run you just flew. After any
+Classic or Projectile Storm game over, <strong>CHALLENGE A FRIEND</strong> gives you a link
+to the exact course you just played, with your score attached.</p>
 
 <p>Whoever opens it flies the <strong>identical course</strong>: the same pipes, the same
-tunnels, in the same order. At the end both scores are shown side by side, and the loser
-can send it straight back. On Android the link opens the app directly if it is installed.</p>
+tunnels, in the same order &mdash; or, from a Storm run, the same projectiles at the same
+angles and speeds. They always fly the mode you flew, so the two scores mean the same
+thing. At the end both are shown side by side, and the loser can send it straight back.
+On Android the link opens the app directly if it is installed.</p>
+
+<p><strong>One catch on Storm links:</strong> they need the current version at both ends. A
+Storm challenge sent to somebody on an older build will just open the menu, because older
+builds have no way to be told which mode a link is for. Classic links are unchanged and
+work everywhere, including with people who have not updated in months.</p>
 
 <p>Challenge runs count like Classic runs the first time you fly a given course &mdash; XP,
 level progress and unlocks all apply. Flying the same course again still earns XP but stops
