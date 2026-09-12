@@ -2,12 +2,23 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["YB7YSARSFX.com.branclev.neondrift"],
+        "appIDs": [
+          "YB7YSARSFX.com.branclev.neondrift"
+        ],
         "components": [
           {
             "/": "/NeonDrift/*",
-            "?": { "c": "?*" },
-            "comment": "Challenge links only - a game URL without ?c= stays in the browser"
+            "?": {
+              "c": "?*"
+            },
+            "comment": "Challenge links. The trailing * must also match the BARE path: the game lives at /NeonDrift/ and every challenge URL is /NeonDrift/?c=TOKEN, so the path component is exactly /NeonDrift/ with nothing after it."
+          },
+          {
+            "/": "/NeonDrift",
+            "?": {
+              "c": "?*"
+            },
+            "comment": "Same link without the trailing slash, in case a messaging client rewrites it."
           }
         ]
       }
