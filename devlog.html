@@ -124,6 +124,59 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 13, 2026</div>
+  <h2>A bird that changes at every prestige, and the bug that would have looked like success</h2>
+
+  <p><strong>SINGULARITY</strong> unlocks at prestige 1 and then keeps going: it is a
+  different bird at every prestige, ten in all. A dark housing with one lit filament at
+  P1; the filament splits into pink and cyan; charge starts arcing inside the shell and
+  out past it; a core forms; the whole thing begins to waver; a halo appears; the shell
+  fractures; a ghost of you starts trailing a frame behind; and at P10 it collapses into
+  prismatic plasma and an eye that finally opens.</p>
+
+  <p>It brings its own wake, which takes over from whichever trail you have equipped and
+  hands it straight back the moment you fly something else. And because working towards
+  something you have never seen is not much of a goal, there is a <strong>PRESTIGE
+  LADDER</strong> under the bird list that walks you through all ten in a live flight,
+  reached or not.</p>
+
+  <p>That is the feature. The part worth writing down is the bug I built the whole thing
+  around avoiding.</p>
+
+  <p>A skin in this game is a function: <code>draw(ctx, width, height)</code>. It gets no
+  argument saying <em>whose</em> bird it is, because until now no skin needed to know.
+  The obvious way to write a skin that changes with your prestige is therefore to have it
+  read your prestige out of the global that holds it &mdash; and the moment you do that,
+  <em>every</em> bird on screen becomes yours. Your opponent at P2 wears your P9 bird on
+  their profile card. The ladder renders the same bird ten times. Nothing throws, nothing
+  logs to the console, nothing looks broken. The feature just quietly is not there.</p>
+
+  <p>That failure mode is the reason this shipped in the order it did. Before the skin
+  existed, every bird in the game was routed through a single function that <em>requires</em>
+  an answer to "whose bird is this?" &mdash; yours, someone else's at a known prestige, or
+  an honest "nobody knows", which renders the base form. There is a test that fails the
+  build if any code draws a skin directly and skips that question, and the server now
+  sends a player's prestige alongside their skin id so the two places that render other
+  people's birds can answer truthfully.</p>
+
+  <p>The tests for the skin itself are all <em>differential</em>. "It drew something" is
+  never the assertion, because a wrong stage draws something too. Every one of them
+  renders two prestiges and demands the output differ &mdash; the bird, the wake, the
+  ladder, each separately, because the bird and the wake are drawn by unrelated code and
+  one of them consulting the ladder while the other did not would give you a P9 bird
+  dragging a P1 trail.</p>
+
+  <p>Two of those tests were passing for the wrong reason at first. Fourteen of this
+  game's skins read the clock inside their draw call, so two renders taken a millisecond
+  apart differ <em>no matter what</em> &mdash; which makes "these two are different" true
+  before the code has done anything at all. Freezing the clock during a capture turned
+  two green tests red, which is how I found out they had never been testing anything.
+  Then nine of the bugs the suite claims to catch were reintroduced one at a time, to
+  confirm each one actually goes red. That is the only reason I believe the other
+  thirty-one.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 10, 2026</div>
   <h2>Storm challenges, five boons, and a link format that had run out of room</h2>
 
