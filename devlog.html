@@ -124,6 +124,84 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 15, 2026</div>
+  <h2>Last Pilot Standing fills itself now, and three bugs that only playing it found</h2>
+
+  <p>Of the 138 Last Pilot lobbies ever opened, <strong>77 were cancelled because
+  nobody else showed up</strong>. Fifty-six percent. A lone player waited three
+  minutes to be told the match was off. Lobbies now fill with AI pilots from 15
+  seconds and launch at 30 &mdash; and if a real pilot joins inside that first 15
+  seconds, the fill is cancelled and you fly against them instead. Anyone arriving
+  later takes an AI pilot's slot. Real matches still happen whenever real players
+  are actually there; the mode just stops being dead when they are not.</p>
+
+  <p>The interesting problem was difficulty, and every intuitive answer to it was
+  wrong.</p>
+
+  <p>The mode is not simply last-alive &mdash; the survivor must also out-score
+  everyone they outlasted &mdash; so a player has to beat the <em>maximum</em> of the
+  field, not a typical member of it. I started by assuming the bots should be
+  centred on the player's skill. Measured against 12,292 real runs, that gives a
+  10% win rate: you are one of ten equal pilots, which is exactly what it sounds
+  like and not what anyone wants from a mode they can now play alone.</p>
+
+  <p>Anchoring on a player's <em>best</em> score is worse, and it is the obvious
+  thing to reach for. Across the real players, best divided by median ranges from
+  2.6&times; to 10.5&times;. One player's best is nearly eleven times a typical run
+  of theirs. A field built around that number is unplayable for them and trivial
+  for someone steadier. A flat multiplier on the median is not much better: 15% for
+  one player, 39% for another.</p>
+
+  <p>What actually works is scaling by the player's own <strong>consistency</strong>
+  rather than their skill. Fit a distribution to each player's median and 90th
+  percentile, and the spread of that distribution &mdash; how erratic they are
+  &mdash; turns out to be the only thing that matters. Simulated at 40,000 trials
+  per player, one formula lands every real player between 19% and 21%, across a
+  tenfold spread in actual ability.</p>
+
+  <p>The nice consequence is that nothing has to watch you mid-race. Player
+  variance is so large that a field drawn once, before the match starts, already
+  produces "sometimes I win, usually I don't" purely from your own good and bad
+  days. No rubber-banding, which players detect and resent anyway.</p>
+
+  <h3>And then I played it</h3>
+
+  <p>Three bugs in two matches, none of which the 27 passing tests could have
+  caught, because all three lived in the seams between the new code and code
+  written months earlier.</p>
+
+  <p><strong>Every bot finished DNF.</strong> A bot has no client, so it never sends
+  a heartbeat, and a sweep that marks silent players as disconnected took the entire
+  field forty seconds in &mdash; before any of them reached the score they were
+  meant to. Then a second-order effect made it worse: the score you have to beat is
+  read from <em>eliminated</em> pilots only, and disconnected ones do not count, so
+  the target collapsed to zero and a score of 24 won the match. Nothing in the new
+  code was wrong. The sweep simply predated the idea of a participant without a
+  client.</p>
+
+  <p><strong>The PILOTS REMAINING counter never moved.</strong> It sat at 10 for an
+  entire race and then jumped to the right number the moment I died. That one turned
+  out to be older than the feature: the counter is repainted only when a live update
+  arrives, and the four-second poll that is supposed to be its safety net was
+  setting the number without ever drawing it. Any human player who dropped a single
+  update had a frozen counter for the rest of their run, and had done since the
+  readout was written.</p>
+
+  <p><strong>A bot entered the endgame chase at zero.</strong> An AI pilot's score is
+  deliberately hidden while it is still flying &mdash; otherwise you would know
+  exactly what to beat before taking off &mdash; but the chase display was built for
+  a human whose score arrives by heartbeat. A bot's never does, so the screen
+  helpfully announced that the leader needed 103 more points while showing its score
+  as 0. That is fixed by ending the match the instant the last human is out, which
+  also removes a spectator wait for a result that was already decided.</p>
+
+  <p>Two matches found more than the whole test suite did. The suite still earned
+  its place &mdash; no amount of playing would have revealed a 39% win rate for one
+  player and 15% for another &mdash; but it verifies the code it was written
+  against, and none of these bugs were in that code.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 13, 2026</div>
   <h2>A bird that changes at every prestige, and the bug that would have looked like success</h2>
 
