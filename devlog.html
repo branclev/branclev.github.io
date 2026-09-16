@@ -124,6 +124,51 @@
 <p>Neon Drift is actively developed, and this page tracks every meaningful update as it lands. If you want to know what changed since you last played, start here.</p>
 
 <div class="entry">
+  <div class="date">SEPTEMBER 16, 2026</div>
+  <h2>The text had gone grey on black, and a source scan said it was fine</h2>
+
+  <p>I opened my own Settings screen and could not comfortably read the tab labels.
+  That is the whole origin of this one. When I measured properly &mdash; every
+  colour in the game, against the background it actually sits on &mdash; it came
+  to <strong>140 separate pieces of text across 12 screens</strong> below the
+  accessibility floor for readable text.</p>
+
+  <p>Nobody ever decided this. That is what makes it worth writing down. Someone
+  &mdash; me &mdash; wrote a faint white once, it looked fine on that monitor at
+  that angle, and over three years about sixty more places copied a dim value from
+  whichever line happened to be nearest. The faintest of them, used for empty-state
+  messages and for the names of birds you have not unlocked yet, was at 1.35:1
+  against a floor of 4.5. That is the exact copy a stuck player is trying to read.</p>
+
+  <p>The fix is two text tiers defined in one place, rather than sixty separate
+  decisions. Brand colours used as text were brightened by raising their opacity,
+  which leaves the hue alone &mdash; the neon is unchanged, only the grey moved.</p>
+
+  <p>Then the interesting part. I wrote a tool to scan the source for colours below
+  the floor, fixed everything it found, and it went green &mdash; while every locked
+  bird card in the game was still unreadable.</p>
+
+  <p>Locked cards were dimmed with opacity, which is the obvious way to say
+  "locked", and the browser multiplies that straight through whatever the text
+  underneath it declared. The colour measured fine on its own; the card faded it to
+  2.36:1. So the dimming was hiding the one line that tells you what to reach
+  &mdash; <em>REACH 75 PTS</em> &mdash; which is the only reason that card is on
+  screen. The store reuses the same "locked" style for anything you do not own, so
+  it was also greying out <strong>prices and product descriptions</strong>. Now only
+  the artwork dims and the words stay full strength.</p>
+
+  <p>A tool that reads code cannot catch that, because the bug does not exist in the
+  code &mdash; it exists in what the browser computes from two correct-looking
+  pieces of it. So there are two tools now: one reads every colour in the source,
+  and one opens the game and measures what actually gets painted. Put the old
+  opacity back and the first one still passes. That is not a flaw in it; it is the
+  reason the second one exists.</p>
+
+  <p>140 down to 0, across 1,557 measured pieces of text. If you have been squinting
+  at the small print, you should not have to any more.</p>
+</div>
+
+<div class="entry">
   <div class="date">SEPTEMBER 15, 2026</div>
   <h2>Last Pilot Standing fills itself now, and three bugs that only playing it found</h2>
 
